@@ -1,0 +1,6 @@
+out/
+build/
+sample/
+.vs/
+bookmarks.txt*
+CMakeSettings.json
