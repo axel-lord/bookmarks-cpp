@@ -1,7 +1,7 @@
 ---
 AccessModifierOffset: -4
 BasedOnStyle: 'Microsoft'
-ColumnLimit: 80
+ColumnLimit: 120
 IndentWidth: '4'
 NamespaceIndentation: Inner
 TabWidth: '4'
@@ -9,7 +9,7 @@ UseTab: Never
 AlignAfterOpenBracket : BlockIndent
 DerivePointerAlignment: false
 PointerAlignment: Left
-AlignArrayOfStructures: Right
+AlignArrayOfStructures: Left
 AlignConsecutiveAssignments: Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AlignConsecutiveMacros: Consecutive
