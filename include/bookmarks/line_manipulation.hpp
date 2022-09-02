@@ -1,18 +1,24 @@
 #pragma once
 
+#include "../util/definitions.hpp"
+#include "../util/string_view_functions.hpp"
+#include "./bookmark.hpp"
+
+#include <optional>
 #include <string_view>
 #include <vector>
 
 namespace bm
 {
 [[nodiscard]] inline auto
-split_by_lines(std::string_view in)
+split_by_linebreak(std::string_view in)
 {
+    using namespace std::literals::string_view_literals;
+
     auto build_store = std::vector<decltype(in)>{};
     while (in.size())
     {
-        while (in.size() && in[0] == '\n')
-            in.remove_prefix(1);
+        in = bm::util::left_trim(in, "\n"sv);
         if (!in.size())
             break;
 
@@ -27,5 +33,13 @@ split_by_lines(std::string_view in)
         in.remove_prefix(lf_index);
     }
     return build_store;
+}
+
+[[nodiscard]] inline auto
+line_to_bookmark([[maybe_unused]] std::string_view line) -> std::optional<bookmark>
+{
+    auto url_tag_pos = line.find(util::URL_TAG);
+    if (url_tag_pos == line.npos)
+        return std::nullopt;
 }
 } // namespace bm

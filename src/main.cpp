@@ -69,7 +69,7 @@ main(int argc, char** argv)
         return url_v;
     };
 
-    [[maybe_unused]] auto lines = bm::split_by_lines(text->view());
+    [[maybe_unused]] auto lines = bm::split_by_linebreak(text->view());
 
     return EXIT_VALUE::SUCCESS;
 }
