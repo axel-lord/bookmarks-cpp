@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.19.0)
 project(bookmark_browser VERSION 0.1.0)
 
-include(CTest)
-enable_testing()
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
@@ -10,6 +8,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 find_package(Threads REQUIRED)
+find_package(Catch2 3 CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 
 if(MSVC)
 	add_compile_options(/W4 /WX)
@@ -42,6 +42,7 @@ target_compile_features(
 
 add_subdirectory("./src")
 add_subdirectory("./include")
+add_subdirectory("./test")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

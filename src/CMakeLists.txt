@@ -8,7 +8,8 @@ add_executable(
 target_precompile_headers(
 	demo
 	PRIVATE
-	"PCH.hpp"
+	"./PCH.hpp"
 )
 
-target_link_libraries(demo ${PROJECT_NAME})
+target_link_libraries(demo PRIVATE ${PROJECT_NAME})
+target_link_libraries(demo PRIVATE fmt::fmt)

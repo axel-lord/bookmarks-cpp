@@ -1,11 +1,13 @@
+#include "bookmarks/line_manipulation.hpp"
 #include "util/definitions.hpp"
 
-#include <vector>
-#include <optional>
-#include <iostream>
-#include <fstream>
-#include <sstream>
+#include <fmt/format.h>
 #include <format>
+#include <fstream>
+#include <iostream>
+#include <optional>
+#include <sstream>
+#include <vector>
 
 using namespace std::literals;
 using namespace bm::util::literals;
@@ -23,47 +25,24 @@ read_bookmark_file(const char* filename)
     return text;
 }
 
-[[nodiscard]] auto
-split_by_lines(std::string_view in)
-{
-    auto build_store = std::vector<decltype(in)>{};
-    while (in.size())
-    {
-        while (in.size() && in[0] == '\n')
-            in.remove_prefix(1);
-        if (!in.size())
-            break;
-
-        auto lf_index = in.find('\n');
-        if (lf_index == in.npos)
-        {
-            build_store.emplace_back(in);
-            break;
-        }
-
-        build_store.emplace_back(in.substr(0, lf_index));
-        in.remove_prefix(lf_index);
-    }
-    return build_store;
-}
-
 int
 main(int argc, char** argv)
 {
     if (argc != 2)
     {
-        std::cout << "Usage: " << *argv << " [FILE]\n";
+        fmt::print("Usage: {} [FILE]\n", *argv);
         return EXIT_VALUE::USAGE_FAILURE;
     }
 
     auto text = read_bookmark_file(argv[1]);
     if (!text)
     {
-        std::cout << "Could not open \"" << argv[1] << "\"\n";
+        fmt::print("Could not open \"{}\"\n", argv[1]);
         return EXIT_VALUE::FILE_READ_FAILURE;
     }
 
-    auto out_filename = std::format("{}.2.txt", argv[1]);
+    auto out_filename = fmt::format("{}.2.txt", argv[1]);
+    // auto out_filename = std::format("{}.2.txt", argv[1]);
 
     auto transform_iter = [](std::string_view v
                           ) -> std::optional<std::string_view>
@@ -89,6 +68,8 @@ main(int argc, char** argv)
 
         return url_v;
     };
+
+    [[maybe_unused]] auto lines = bm::split_by_lines(text->view());
 
     return EXIT_VALUE::SUCCESS;
 }
