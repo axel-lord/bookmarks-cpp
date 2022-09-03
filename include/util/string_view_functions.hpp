@@ -30,4 +30,5 @@ indice_substring(const std::string_view in, std::size_t lower, std::size_t upper
 {
     return in.substr(lower, upper - lower);
 }
+
 } // namespace bm::util

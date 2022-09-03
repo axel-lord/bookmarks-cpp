@@ -10,6 +10,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 find_package(Threads REQUIRED)
 find_package(Catch2 3 CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
+find_package(spdlog CONFIG REQUIRED)
 
 if(MSVC)
 	add_compile_options(/W4 /WX)
@@ -38,6 +39,12 @@ target_compile_features(
 	${PROJECT_NAME}
 	INTERFACE
 	cxx_std_23
+)
+
+target_link_libraries(
+	${PROJECT_NAME}
+	INTERFACE
+	fmt::fmt
 )
 
 add_subdirectory("./src")

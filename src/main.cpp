@@ -1,13 +1,15 @@
+#include "bookmarks/bookmark.hpp"
 #include "bookmarks/line_manipulation.hpp"
 #include "util/definitions.hpp"
 
 #include <fmt/format.h>
-#include <format>
 #include <fstream>
 #include <iostream>
 #include <optional>
+#include <ranges>
 #include <sstream>
 #include <vector>
+#include <spdlog/spdlog.h>
 
 using namespace std::literals;
 using namespace bm::util::literals;
@@ -41,35 +43,35 @@ main(int argc, char** argv)
         return EXIT_VALUE::FILE_READ_FAILURE;
     }
 
+    auto text_view = text->view();
+
     auto out_filename = fmt::format("{}.2.txt", argv[1]);
-    // auto out_filename = std::format("{}.2.txt", argv[1]);
+    auto lines        = bm::split_by_linebreak(text->view());
 
-    auto transform_iter = [](std::string_view v
-                          ) -> std::optional<std::string_view>
+    auto is_not_bookmark_begin = [](auto line)
     {
-        auto b = std::size(bm::util::URL_TAG);
-        auto f = v.find(bm::util::INFO_TAG, b);
-        if (b > std::size(v)) [[unlikely]]
-        {
-            std::cout << "[" << v << "]\n";
-            return {};
-        }
-
-        std::string_view url_v;
-        if (f == v.npos) [[unlikely]]
-            url_v = v.substr(b);
-        else
-            url_v = v.substr(b, f - b);
-
-        while (!url_v.empty() && url_v.back() == ' ')
-            url_v.remove_suffix(1);
-        while (!url_v.empty() && url_v.front() == ' ')
-            url_v.remove_prefix(1);
-
-        return url_v;
+        return line != bm::util::BOOKMARKS_BEGIN;
     };
 
-    [[maybe_unused]] auto lines = bm::split_by_linebreak(text->view());
+    auto is_not_bookmark_end = [](auto line)
+    {
+        return line != bm::util::BOOKMARKS_END;
+    };
+
+    auto bookmark_lines = lines | std::views::drop_while(is_not_bookmark_begin) |
+                          std::views::drop(1) | std::views::take_while(is_not_bookmark_end);
+
+    for (auto i = 0_z; auto&& l : bookmark_lines | std::views::take(3))
+    {
+        auto v = bm::line_to_bookmark(l);
+        if (v)
+            spdlog::debug("Line: {}, {}\n", i, *v);
+        else
+            spdlog::warn("Could not parse line too bookmark: [{}]", l);
+        ++i;
+    }
+
+    fmt::print("Bookmark Test: {}\n", bm::bookmark{"https://", "Generic", "nice <,> man"});
 
     return EXIT_VALUE::SUCCESS;
 }
