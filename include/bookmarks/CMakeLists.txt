@@ -3,4 +3,5 @@ target_sources(
 	INTERFACE
 	"./line_manipulation.hpp"
 	"./bookmark.hpp"
+	"./structure_constants.hpp"
 )

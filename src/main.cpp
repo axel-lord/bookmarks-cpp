@@ -1,15 +1,19 @@
 #include "bookmarks/bookmark.hpp"
 #include "bookmarks/line_manipulation.hpp"
-#include "util/definitions.hpp"
+#include "bookmarks/structure_constants.hpp"
+#include "util/exit_values.hpp"
+#include "util/literal_suffixes.hpp"
 
 #include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <optional>
 #include <ranges>
+#include <spdlog/sinks/basic_file_sink.h>
+#include <spdlog/spdlog.h>
 #include <sstream>
 #include <vector>
-#include <spdlog/spdlog.h>
+#include <span>
 
 using namespace std::literals;
 using namespace bm::util::literals;
@@ -27,12 +31,39 @@ read_bookmark_file(const char* filename)
     return text;
 }
 
-int
-main(int argc, char** argv)
+[[nodiscard]] inline auto
+create_logger(const std::string& filename) noexcept
 {
+    auto internal_creation = [&]
+    {
+        return spdlog::basic_logger_mt("file_log", filename);
+    };
+    try
+    {
+        auto logger = internal_creation();
+        return std::optional{logger};
+    }
+    catch (const spdlog::spdlog_ex& ex)
+    {
+        fmt::print("Log initialization failed: {}\n", ex.what());
+    }
+    return std::optional<decltype(internal_creation())>{std::nullopt};
+}
+
+int
+main(int const argc, char const* const* const argv)
+{
+    if (!argc)
+    {
+        fmt::print(
+            "{}\n", "Program (Bookmark Manager) executed in a manner that is not supported!"sv
+        );
+        return EXIT_VALUE::UNSUPPORTED_EXECUTION;
+    }
+
     if (argc != 2)
     {
-        fmt::print("Usage: {} [FILE]\n", *argv);
+        fmt::print("Usage: {} [FILE]\n", argv[0]);
         return EXIT_VALUE::USAGE_FAILURE;
     }
 
@@ -43,35 +74,36 @@ main(int argc, char** argv)
         return EXIT_VALUE::FILE_READ_FAILURE;
     }
 
-    auto text_view = text->view();
+    auto opt_logger = create_logger(fmt::format("{}.log.txt", argv[0]));
+    if (!opt_logger)
+        return EXIT_VALUE::LOG_CREATION_FAILURE;
+    auto& logger = **opt_logger;
+    spdlog::set_level(spdlog::level::debug);
 
-    auto out_filename = fmt::format("{}.2.txt", argv[1]);
-    auto lines        = bm::split_by_linebreak(text->view());
+    auto const lines = bm::split_by_linebreak(text->view());
+    auto const line_view = std::span(lines);
 
-    auto is_not_bookmark_begin = [](auto line)
+    auto const is_not_bookmark_begin = [](auto const line)
     {
-        return line != bm::util::BOOKMARKS_BEGIN;
+        return line != bm::constants::BOOKMARKS_BEGIN;
+    };
+    auto const is_not_bookmark_end = [](auto const line)
+    {
+        return line != bm::constants::BOOKMARKS_END;
     };
 
-    auto is_not_bookmark_end = [](auto line)
-    {
-        return line != bm::util::BOOKMARKS_END;
-    };
+    auto bookmark_lines = line_view | std::views::drop_while(is_not_bookmark_begin) | std::views::drop(1) |
+                          std::views::take_while(is_not_bookmark_end);
 
-    auto bookmark_lines = lines | std::views::drop_while(is_not_bookmark_begin) |
-                          std::views::drop(1) | std::views::take_while(is_not_bookmark_end);
-
-    for (auto i = 0_z; auto&& l : bookmark_lines | std::views::take(3))
+    for (auto i = 0_z; auto&& l : bookmark_lines | std::views::take(50))
     {
         auto v = bm::line_to_bookmark(l);
         if (v)
-            spdlog::debug("Line: {}, {}\n", i, *v);
+            logger.debug("Item: {}, {}\n", i, *v);
         else
-            spdlog::warn("Could not parse line too bookmark: [{}]", l);
+            logger.warn("Could not parse line too bookmark: [{}]", l);
         ++i;
     }
-
-    fmt::print("Bookmark Test: {}\n", bm::bookmark{"https://", "Generic", "nice <,> man"});
 
     return EXIT_VALUE::SUCCESS;
 }

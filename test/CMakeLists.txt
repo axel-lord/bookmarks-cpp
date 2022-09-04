@@ -4,7 +4,8 @@ add_executable(
 	${TESTS_NAME}
 
 	# Sources
-	misc.cpp
+	"./string_view_functions.cpp"
+	"./line_manipulation.cpp"
 )
 
 target_link_libraries(

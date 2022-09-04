@@ -1,6 +1,7 @@
 target_sources(
 	${PROJECT_NAME}
 	INTERFACE
-	"./definitions.hpp"
+	"./exit_values.hpp"
+	"./literal_suffixes.hpp"
 	"./string_view_functions.hpp"
 )
