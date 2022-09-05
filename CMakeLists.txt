@@ -50,6 +50,7 @@ target_link_libraries(
 add_subdirectory("./src")
 add_subdirectory("./include")
 add_subdirectory("./test")
+add_subdirectory("./experimental")
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
