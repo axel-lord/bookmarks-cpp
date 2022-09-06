@@ -1,8 +1,8 @@
 #pragma once
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <span>
-#include <algorithm>
 
 namespace custom_realloc_no_span
 {
@@ -41,7 +41,7 @@ template <typename T, typename S = std::size_t> struct vector
             value.~T();
         };
 
-        std::for_each(arr, arr+size_val, call_deleters);
+        std::for_each(arr, arr + size_val, call_deleters);
 
         if (arr)
             std::free(arr);

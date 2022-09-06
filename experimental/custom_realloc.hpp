@@ -1,8 +1,8 @@
 #pragma once
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
 #include <span>
-#include <algorithm>
 
 namespace custom_realloc
 {

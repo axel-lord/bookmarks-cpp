@@ -1,8 +1,8 @@
 #pragma once
-#include <span>
+#include <algorithm>
 #include <cstdlib>
 #include <cstring>
-#include <algorithm>
+#include <span>
 
 namespace custom_malloc
 {

@@ -2,17 +2,16 @@
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
-#include <new>
 #include <span>
 
-namespace custom_realloc_starting_capacity
+namespace custom_final
 {
 
-template <typename T, typename S = std::size_t, S starting_capacity = 2> struct vector
+template <typename T, typename S = std::size_t> struct vector
 {
     using size_type = S;
 
-    size_type capacity = starting_capacity;
+    size_type capacity = 0;
     size_type size_val = 0;
     T*        arr      = nullptr;
 
@@ -20,7 +19,7 @@ template <typename T, typename S = std::size_t, S starting_capacity = 2> struct 
     {
         if (size_val == capacity)
         {
-            auto const new_capacity = capacity * 2;
+            auto const new_capacity = static_cast<size_type>(capacity == 0) + capacity * 2;
 
             auto new_arr = static_cast<T*>(std::realloc(arr, new_capacity * sizeof(T)));
             if (!new_arr)
@@ -33,10 +32,6 @@ template <typename T, typename S = std::size_t, S starting_capacity = 2> struct 
         new (arr + size_val) T{std::forward<Args>(args)...};
         ++size_val;
         return arr + size_val - 1;
-    }
-
-    vector() : arr(static_cast<T*>(std::malloc(capacity * sizeof(T))))
-    {
     }
 
     ~vector()
@@ -82,4 +77,4 @@ end(vector<T>& vec) noexcept
     return vec.arr + size(vec);
 }
 
-} // namespace custom_realloc_starting_capacity
+} // namespace custom_final

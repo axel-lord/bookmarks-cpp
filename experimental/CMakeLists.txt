@@ -12,6 +12,7 @@ add_executable(
 	"./custom_memcpy.hpp"
 	"./custom_normal.hpp"
 	"./custom_realloc.hpp"
+	"./custom_final.hpp"
 	"./custom_capacity.hpp"
 	"./custom_realloc_no_span.hpp"
 	"./custom_realloc_no_span_simple.hpp"

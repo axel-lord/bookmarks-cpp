@@ -1,13 +1,13 @@
 #include "prepare.hpp"
+
 #include "util/string_view_functions.hpp"
 
 #include <random>
 
 namespace prep
 {
-	
-constexpr int input_size = 4096;
 
+constexpr int input_size = 4096;
 
 auto
 make_data_string(std::size_t length)
@@ -28,7 +28,7 @@ make_data_string(std::size_t length)
 auto
 make_data_array() -> std::span<input_type>
 {
-	using input_array = std::array<input_type, input_size>;
+    using input_array = std::array<input_type, input_size>;
 
     static auto a = std::make_unique<input_array>();
 
@@ -56,4 +56,4 @@ make_data_array() -> std::span<input_type>
 
 const std::span<input_type> DATA_ARRAY = make_data_array();
 
-}
+} // namespace prep

@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <benchmark/benchmark.h>
 #include <chrono>
@@ -11,4 +12,3 @@
 #include <random>
 #include <span>
 #include <vector>
-#include <algorithm>

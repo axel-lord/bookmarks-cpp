@@ -1,8 +1,8 @@
 #pragma once
-#include <span>
-#include <memory>
-#include <cstring>
 #include <algorithm>
+#include <cstring>
+#include <memory>
+#include <span>
 
 namespace custom_memcpy
 {

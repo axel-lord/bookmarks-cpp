@@ -1,20 +1,21 @@
 #include "bookmarks/bookmark.hpp"
-#include "util/string_view_functions.hpp"
 #include "custom_capacity.hpp"
 #include "custom_malloc.hpp"
 #include "custom_memcpy.hpp"
 #include "custom_normal.hpp"
 #include "custom_realloc.hpp"
 #include "custom_realloc_no_span.hpp"
-#include "custom_realloc_no_span_starting_capacity.hpp"
 #include "custom_realloc_no_span_simple.hpp"
+#include "custom_realloc_no_span_starting_capacity.hpp"
 #include "prepare.hpp"
+#include "util/string_view_functions.hpp"
 
+#include <algorithm>
 #include <array>
 #include <benchmark/benchmark.h>
 #include <chrono>
-#include <cstdlib>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <exception>
 #include <iostream>
@@ -23,8 +24,6 @@
 #include <random>
 #include <span>
 #include <vector>
-#include <algorithm>
-
 
 namespace
 {
@@ -39,7 +38,7 @@ compare_vector(auto& state)
         for (auto&& value : prep::DATA_ARRAY)
             vec.emplace_back(value);
 
-		benchmark::DoNotOptimize(vec);
+        benchmark::DoNotOptimize(vec);
     }
 }
 
@@ -94,7 +93,9 @@ compare_vector_custom_realloc_no_span(benchmark::State& state)
 auto
 compare_vector_custom_realloc_starting_capacity_4096(benchmark::State& state)
 {
-    compare_vector<custom_realloc_starting_capacity::vector<prep::input_type, std::size_t, 4096>>(state);
+    compare_vector<custom_realloc_starting_capacity::vector<prep::input_type, std::size_t, 4096>>(
+        state
+    );
 }
 
 auto
