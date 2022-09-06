@@ -12,22 +12,22 @@ template <typename T, typename S = std::size_t, S starting_capacity = 2> struct 
 {
     using size_type = S;
 
-    size_type capacity = starting_capacity;
+    size_type capacity_val = starting_capacity;
     size_type size_val = 0;
     T*        arr      = nullptr;
 
     template <typename... Args> inline T* emplace_back(Args&&... args)
     {
-        if (size_val == capacity)
+        if (size_val == capacity_val)
         {
-            auto const new_capacity = capacity * 2;
+            auto const new_capacity = capacity_val * 2;
 
             auto new_arr = static_cast<T*>(std::realloc(arr, new_capacity * sizeof(T)));
             if (!new_arr)
                 return nullptr;
 
             arr      = new_arr;
-            capacity = new_capacity;
+            capacity_val = new_capacity;
         }
 
         new (arr + size_val) T{std::forward<Args>(args)...};
@@ -35,7 +35,7 @@ template <typename T, typename S = std::size_t, S starting_capacity = 2> struct 
         return arr + size_val - 1;
     }
 
-    vector() : arr(static_cast<T*>(std::malloc(capacity * sizeof(T))))
+    vector() : arr(static_cast<T*>(std::malloc(capacity_val * sizeof(T))))
     {
     }
 

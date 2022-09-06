@@ -9,16 +9,16 @@ template <typename T, typename S = std::size_t> struct vector
 {
     using size_type = S;
 
-    size_type            capacity = 0;
+    size_type            capacity_val = 0;
     size_type            size_val = 0;
     std::unique_ptr<T[]> arr;
     std::span<T>         span;
 
     template <typename... Args> inline auto emplace_back(Args&&... args)
     {
-        if (size_val == capacity)
+        if (size_val == capacity_val)
         {
-            auto const new_capacity = static_cast<size_type>(capacity == 0) + capacity * 2;
+            auto const new_capacity = static_cast<size_type>(capacity_val == 0) + capacity_val * 2;
 
             auto new_arr = std::make_unique<T[]>(new_capacity);
 
@@ -28,7 +28,7 @@ template <typename T, typename S = std::size_t> struct vector
             }
 
             arr      = std::move(new_arr);
-            capacity = new_capacity;
+            capacity_val = new_capacity;
         }
 
         T& val = arr[size_val];
