@@ -2,6 +2,7 @@ out/
 build/
 sample/
 .vs/
+.cache/
 bookmarks.txt*
 CMakeSettings.json
 compile_commands.json

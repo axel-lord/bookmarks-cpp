@@ -4,13 +4,14 @@ project(bookmark_browser VERSION 0.1.0)
 set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
 find_package(Threads REQUIRED)
 find_package(Catch2 3 CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
+find_package(benchmark CONFIG REQUIRED)
 
 if(MSVC)
 	add_compile_options(/W4 /WX)
@@ -38,7 +39,7 @@ target_include_directories(
 target_compile_features(
 	${PROJECT_NAME}
 	INTERFACE
-	cxx_std_23
+	cxx_std_20
 )
 
 target_link_libraries(
