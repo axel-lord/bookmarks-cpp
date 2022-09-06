@@ -4,3 +4,4 @@ sample/
 .vs/
 bookmarks.txt*
 CMakeSettings.json
+compile_commands.json
