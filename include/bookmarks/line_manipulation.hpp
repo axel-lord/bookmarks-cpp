@@ -68,15 +68,15 @@ line_to_bookmark(const std::string_view line) -> std::optional<bookmark>
         return std::nullopt;
     auto tags_tag_end = tags_tag_pos + size(constants::TAGS_TAG);
 
-    auto get_substring = [](auto line, auto lower, auto upper)
+    auto get_substring = [line](auto lower, auto upper)
     {
         return util::trim(util::indice_substring(line, lower, upper), "\n\t ");
     };
 
     return bm::bookmark{
-        get_substring(line, url_tag_end, info_tag_pos),
-        get_substring(line, info_tag_end, tags_tag_pos),
-        get_substring(line, tags_tag_end, size(line))};
+        get_substring(url_tag_end, info_tag_pos),
+        get_substring(info_tag_end, tags_tag_pos),
+        get_substring(tags_tag_end, size(line))};
 }
 
 } // namespace bm
