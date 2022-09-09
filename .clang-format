@@ -9,7 +9,6 @@ UseTab: Never
 AlignAfterOpenBracket : BlockIndent
 DerivePointerAlignment: false
 PointerAlignment: Left
-AlignArrayOfStructures: Left
 AlignConsecutiveAssignments: Consecutive
 AlignConsecutiveDeclarations: Consecutive
 AlignConsecutiveMacros: Consecutive

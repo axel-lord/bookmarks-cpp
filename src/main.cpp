@@ -4,34 +4,22 @@
 #include "util/exit_values.hpp"
 #include "util/literal_suffixes.hpp"
 
+#include <algorithm>
 #include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <optional>
-#include <ranges>
+#include <span>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
-#include <sstream>
-#include <vector>
-#include <span>
+
 
 using namespace std::literals;
 using namespace bm::util::literals;
 
 namespace EXIT_VALUE = bm::util::EXIT_VALUE;
 
-[[nodiscard]] std::optional<std::ostringstream>
-read_bookmark_file(const char* filename)
-{
-    auto text = std::ostringstream{};
-    if (auto file = std::ifstream{filename})
-        text << file.rdbuf();
-    else [[unlikely]]
-        return std::nullopt;
-    return text;
-}
-
-[[nodiscard]] inline auto
+[[nodiscard]] static inline auto
 create_logger(const std::string& filename) noexcept
 {
     auto internal_creation = [&]
@@ -48,6 +36,78 @@ create_logger(const std::string& filename) noexcept
         fmt::print("Log initialization failed: {}\n", ex.what());
     }
     return std::optional<decltype(internal_creation())>{std::nullopt};
+}
+
+static inline auto
+run_app(std::string_view const bookmark_view)
+{
+    auto bookmarks = bm::build_bookmark_vector(bookmark_view);
+    auto current   = std::span{bookmarks};
+
+    auto command_map =
+        std::unordered_map<std::string_view, std::function<void(std::string_view)>>{};
+    command_map.emplace(
+        "show",
+        [&current](std::string_view v)
+        {
+            auto arguments = bm::split_by_delimiter(v, ' ');
+            auto from      = 0_z;
+            auto amount    = 25_z;
+            switch (size(arguments))
+            {
+            case 1:
+            {
+                auto arg = bm::to_number<unsigned int>(arguments[0]);
+                if (!arg)
+                {
+                    fmt::print("Could not convert \"{}\" to an integer.\n", arguments[0]);
+                    return;
+                }
+                from = *arg;
+                break;
+            }
+            };
+
+            from = std::min(from, size(current));
+            amount = std::min(from + amount, size(current)) - from;
+
+            for (auto&& b : current.subspan(from, amount))
+            {
+                fmt::print("{}\n", b);
+            }
+        }
+    );
+
+    while (true)
+    {
+        fmt::print("{}\n", "Enter Command:");
+        auto buffer = std::string{};
+        getline(std::cin, buffer);
+
+        auto command = std::string_view{buffer};
+
+        if (command.empty())
+            continue;
+
+        if (command == "exit"sv)
+            break;
+
+        auto arguments = std::string_view{};
+        if (auto space_index = command.find(' '); space_index != command.npos)
+        {
+            arguments = command.substr(std::min(space_index + 1, size(command)));
+            command   = command.substr(0, space_index);
+        }
+
+        fmt::print("[{}] [{}]\n", command, arguments);
+        if (!command_map.contains(command))
+        {
+            fmt::print("Could not find command \"{}\".\n", command);
+            continue;
+        }
+
+        command_map[command](arguments);
+    }
 }
 
 int
@@ -67,43 +127,20 @@ main(int const argc, char const* const* const argv)
         return EXIT_VALUE::USAGE_FAILURE;
     }
 
-    auto text = read_bookmark_file(argv[1]);
+    auto opt_logger = create_logger(fmt::format("{}.log.txt", argv[0]));
+    if (!opt_logger)
+        return EXIT_VALUE::LOG_CREATION_FAILURE;
+    (*opt_logger)->set_level(spdlog::level::trace);
+    spdlog::set_default_logger(*opt_logger);
+
+    auto const text = bm::read_file(argv[1]);
     if (!text)
     {
         fmt::print("Could not open \"{}\"\n", argv[1]);
         return EXIT_VALUE::FILE_READ_FAILURE;
     }
 
-    auto opt_logger = create_logger(fmt::format("{}.log.txt", argv[0]));
-    if (!opt_logger)
-        return EXIT_VALUE::LOG_CREATION_FAILURE;
-    auto& logger = **opt_logger;
-    spdlog::set_level(spdlog::level::debug);
-
-    auto const lines = bm::split_by_linebreak(text->view());
-    auto const line_view = std::span(lines);
-
-    auto const is_not_bookmark_begin = [](auto const line)
-    {
-        return line != bm::constants::BOOKMARKS_BEGIN;
-    };
-    auto const is_not_bookmark_end = [](auto const line)
-    {
-        return line != bm::constants::BOOKMARKS_END;
-    };
-
-    auto bookmark_lines = line_view | std::views::drop_while(is_not_bookmark_begin) | std::views::drop(1) |
-                          std::views::take_while(is_not_bookmark_end);
-
-    for (auto i = 0_z; auto&& l : bookmark_lines | std::views::take(50))
-    {
-        auto v = bm::line_to_bookmark(l);
-        if (v)
-            logger.debug("Item: {}, {}\n", i, *v);
-        else
-            logger.warn("Could not parse line too bookmark: [{}]", l);
-        ++i;
-    }
+    run_app(text->view());
 
     return EXIT_VALUE::SUCCESS;
 }

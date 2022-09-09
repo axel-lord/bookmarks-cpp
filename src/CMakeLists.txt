@@ -11,4 +11,4 @@ target_precompile_headers(
 	"./PCH.hpp"
 )
 
-target_link_libraries(demo PRIVATE ${PROJECT_NAME} spdlog::spdlog)
+target_link_libraries(demo PRIVATE ${PROJECT_NAME})
