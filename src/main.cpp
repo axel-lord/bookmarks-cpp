@@ -12,7 +12,8 @@
 #include <span>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
-
+#include <string_view>
+#include <unordered_map>
 
 using namespace std::literals;
 using namespace bm::util::literals;
@@ -38,75 +39,123 @@ create_logger(const std::string& filename) noexcept
     return std::optional<decltype(internal_creation())>{std::nullopt};
 }
 
+struct command_context;
+
+using command_map =
+    std::unordered_map<std::string_view, std::function<void(std::string_view, command_context)>>;
+
+struct command_context
+{
+    std::vector<bm::bookmark>& bookmarks;
+    std::span<bm::bookmark>&   current;
+	command_map const& cmap;
+};
+
+
+namespace commands
+{
+static auto
+show(std::string_view v, command_context ctx)
+{
+    auto arguments = bm::split_by_delimiter(v, ' ');
+    auto from      = 0_z;
+    auto amount    = 25_z;
+    switch (size(arguments))
+    {
+    case 0:
+        break;
+    case 2:
+    {
+        auto arg = bm::to_number<unsigned int>(arguments[1]);
+        if (!arg)
+        {
+            fmt::print("Could not convert \"{}\" to an integer.\n", arguments[1]);
+            return;
+        }
+        amount = *arg;
+    }
+        [[fallthrough]];
+    case 1:
+    {
+        auto arg = bm::to_number<unsigned int>(arguments[0]);
+        if (!arg)
+        {
+            fmt::print("Could not convert \"{}\" to an integer.\n", arguments[0]);
+            return;
+        }
+        from = *arg;
+        break;
+    }
+    default:
+    {
+        fmt::print("Too many arguments passed ({}).", size(arguments));
+        return;
+    }
+    };
+
+    from   = std::min(from, size(ctx.current));
+    amount = std::min(from + amount, size(ctx.current)) - from;
+
+    for (auto&& b : ctx.current.subspan(from, amount))
+    {
+        fmt::print("{}\n", b);
+    }
+}
+} // namespace commands
+
+static inline auto get_input()
+{
+	auto buffer = std::string{};
+	getline(std::cin, buffer);
+	return buffer;
+}
+
+static inline auto parse_arguments(std::string_view const line)
+{
+	struct cmd_arg
+	{
+		std::string_view command;
+		std::string_view arguments;
+	};
+
+	if (auto space_index = line.find(' '); space_index != line.npos)
+	{
+		return cmd_arg{line.substr(std::min(space_index + 1, size(line))), line.substr(0, space_index)};
+	}
+
+	return cmd_arg{line, ""sv};
+}
+
 static inline auto
 run_app(std::string_view const bookmark_view)
 {
     auto bookmarks = bm::build_bookmark_vector(bookmark_view);
     auto current   = std::span{bookmarks};
 
-    auto command_map =
-        std::unordered_map<std::string_view, std::function<void(std::string_view)>>{};
-    command_map.emplace(
-        "show",
-        [&current](std::string_view v)
-        {
-            auto arguments = bm::split_by_delimiter(v, ' ');
-            auto from      = 0_z;
-            auto amount    = 25_z;
-            switch (size(arguments))
-            {
-            case 1:
-            {
-                auto arg = bm::to_number<unsigned int>(arguments[0]);
-                if (!arg)
-                {
-                    fmt::print("Could not convert \"{}\" to an integer.\n", arguments[0]);
-                    return;
-                }
-                from = *arg;
-                break;
-            }
-            };
-
-            from = std::min(from, size(current));
-            amount = std::min(from + amount, size(current)) - from;
-
-            for (auto&& b : current.subspan(from, amount))
-            {
-                fmt::print("{}\n", b);
-            }
-        }
-    );
+    auto const cmap = command_map{{"show"sv, commands::show}};
 
     while (true)
     {
         fmt::print("{}\n", "Enter Command:");
-        auto buffer = std::string{};
-        getline(std::cin, buffer);
+		auto const buffer = get_input();
+        auto const line = std::string_view{buffer};
 
-        auto command = std::string_view{buffer};
-
-        if (command.empty())
+        if (line.empty())  // nothing entered
             continue;
 
-        if (command == "exit"sv)
+        if (line.starts_with("exit"sv))  // user wants to exit
             break;
-
-        auto arguments = std::string_view{};
-        if (auto space_index = command.find(' '); space_index != command.npos)
-        {
-            arguments = command.substr(std::min(space_index + 1, size(command)));
-            command   = command.substr(0, space_index);
-        }
+		
+		auto const [command, arguments] = parse_arguments(line);
 
         fmt::print("[{}] [{}]\n", command, arguments);
-        if (!command_map.contains(command))
+        if (!cmap.contains(command))
         {
             fmt::print("Could not find command \"{}\".\n", command);
             continue;
         }
 
-        command_map[command](arguments);
+        cmap.at(command)(arguments, {bookmarks, current, cmap});
     }
 }
 

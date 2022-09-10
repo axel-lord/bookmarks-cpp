@@ -6,11 +6,12 @@
 
 #include <charconv>
 #include <optional>
+#include <range/v3/view.hpp>
+#include <range/v3/view/transform.hpp>
 #include <span>
 #include <spdlog/spdlog.h>
 #include <string_view>
 #include <vector>
-#include <range/v3/view.hpp>
 
 namespace bm
 {
@@ -157,8 +158,9 @@ to_bookmark(const std::string_view line) -> std::optional<bookmark>
 [[nodiscard]] static inline auto
 build_bookmark_vector(std::string_view const bookmark_view)
 {
-    auto const lines     = bm::split_by_linebreak(bookmark_view);
-    auto const line_view = std::span(lines);
+    namespace views = ranges::views;
+
+    auto const lines = bm::split_by_linebreak(bookmark_view);
 
     auto const is_not_bookmark_begin = [](auto const line)
     {
@@ -169,22 +171,27 @@ build_bookmark_vector(std::string_view const bookmark_view)
         return line != bm::constants::BOOKMARKS_END;
     };
 
-    auto bookmark_lines = line_view | ranges::views::drop_while(is_not_bookmark_begin) |
-                          ranges::views::drop(1) | ranges::views::take_while(is_not_bookmark_end);
+    auto const has_value = [](auto const optional_bookmark)
+    {
+        return !!optional_bookmark;
+    };
 
+    auto const dereference = [](auto const pointer_like)
+    {
+        return *pointer_like;
+    };
+
+    auto bookmarks = lines | views::drop_while(is_not_bookmark_begin) | views::drop(1) |
+                     views::take_while(is_not_bookmark_end) | views::transform(bm::to_bookmark) |
+                     views::filter(has_value) | views::transform(dereference);
+
+    // allows for reserving capacity.
     auto bookmark_vector = std::vector<bm::bookmark>{};
     bookmark_vector.reserve(lines.capacity());
-    for (auto&& l : bookmark_lines | ranges::views::take(50))
-    {
-        auto v = bm::to_bookmark(l);
-        if (!v) [[unlikely]]
-        {
-            spdlog::warn("Could not parse line too bookmark: [{}]", l);
-            continue;
-        }
 
-        bookmark_vector.push_back(std::move(*v));
-    }
+    for (auto const& b : bookmarks)
+        bookmark_vector.push_back(b);
+
     return bookmark_vector;
 }
 
