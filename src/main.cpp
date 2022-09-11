@@ -3,12 +3,15 @@
 #include "bookmarks/structure_constants.hpp"
 #include "util/exit_values.hpp"
 #include "util/literal_suffixes.hpp"
+#include "util/re.hpp"
 
 #include <algorithm>
 #include <fmt/format.h>
 #include <fstream>
 #include <iostream>
 #include <optional>
+#include <range/v3/algorithm/for_each.hpp>
+#include <regex>
 #include <span>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
@@ -109,17 +112,71 @@ show(command_context ctx)
     }
 }
 
-static auto filter(command_context ctx)
+static auto
+filter(command_context ctx)
 {
-	if (ctx.arguments.empty())
+    namespace views = ranges::views;
+
+    if (ctx.arguments.empty())
+    {
+        fmt::print("filter needs arguments, none were passed.\n");
+        return;
+    }
+
+    auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
+    ctx.bookmark_buffer.clear();
+
+    auto const search_re = bm::util::compile_regex(ctx.arguments);
+    if (!search_re)
+    {
+        fmt::print("Could not compile regex \"{}\".\n", ctx.arguments);
+        return;
+    }
+
+    auto const contains_arguments = [&](bm::bookmark b)
+    {
+        // return (b.url.find(ctx.arguments) != b.url.npos) ||
+        //        (b.description.find(ctx.arguments) != b.description.npos);
+        return bool{
+            std::regex_search(begin(b.url), end(b.url), *search_re) ||
+            std::regex_search(begin(b.description), end(b.description), *search_re)};
+    };
+
+    auto const add_to_buffer = [&](bm::bookmark b)
+    {
+        ctx.bookmark_buffer.push_back(b);
+    };
+
+    ranges::for_each(ctx.bookmarks | views::filter(contains_arguments), add_to_buffer);
+    ctx.current = std::span{ctx.bookmark_buffer};
+}
+
+static auto
+count(command_context ctx)
+{
+    fmt::print("{} bookmarks.\n", size(ctx.current));
+}
+
+static auto
+reset(command_context ctx)
+{
+    ctx.current = std::span{ctx.bookmarks};
+}
+
+static auto
+fuzzy(command_context ctx)
+{
+	auto builder = std::ostringstream{};
+	builder << ".*"sv;
+	for (auto&& character : ctx.arguments)
 	{
-		fmt::print("filter needs arguments, none were passed.\n");
-		return;
+		builder << character << ".*"sv;
 	}
 	
-	auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
-	ctx.bookmark_buffer.clear();
+	auto cpy = ctx;
+	cpy.arguments = builder.view();
 
+	filter(cpy);
 }
 
 } // namespace commands
@@ -157,7 +214,12 @@ run_app(std::string_view const bookmark_view)
     auto bookmark_buffer = bookmark_container{};
     auto current         = std::span{bookmarks};
 
-    auto const cmap = command_map{{"show"sv, commands::show}};
+    auto const cmap = command_map{
+        {"show"sv, commands::show},
+        {"filter"sv, commands::filter},
+        {"count"sv, commands::count},
+        {"reset"sv, commands::reset},
+		{"fuzzy"sv, commands::fuzzy}};
 
     bookmark_buffer.reserve(bookmarks.capacity());
 
@@ -171,12 +233,11 @@ run_app(std::string_view const bookmark_view)
         if (line.empty()) // nothing entered
             continue;
 
-        if (line.starts_with("exit"sv)) // user wants to exit
-            break;
-
         auto const [command, arguments] = parse_arguments(line);
 
-        fmt::print("[{}] [{}]\n", command, arguments);
+        if (command == "exit"sv) // special command to ensure exit is possible
+            break;
+
         if (!cmap.contains(command))
         {
             fmt::print("Could not find command \"{}\".\n", command);
