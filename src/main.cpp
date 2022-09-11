@@ -94,7 +94,7 @@ show(command_context ctx)
                 parse_arg_n(1_z, DEFAULT_SHOW_ARGS.second)};
         default:
             fmt::print(
-                "Too many arguments passed ({}) defaulting to \"{}\", \"{}\".", size(arguments),
+                "Too many arguments passed ({}) defaulting to \"{}\", \"{}\".\n", size(arguments),
                 DEFAULT_SHOW_ARGS.first, DEFAULT_SHOW_ARGS.second
             );
             return DEFAULT_SHOW_ARGS;
@@ -109,7 +109,18 @@ show(command_context ctx)
     }
 }
 
-// static auto filter(command_context ctx);
+static auto filter(command_context ctx)
+{
+	if (ctx.arguments.empty())
+	{
+		fmt::print("filter needs arguments, none were passed.\n");
+		return;
+	}
+	
+	auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
+	ctx.bookmark_buffer.clear();
+
+}
 
 } // namespace commands
 
