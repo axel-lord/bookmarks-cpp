@@ -14,6 +14,7 @@
 #include <spdlog/spdlog.h>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 
 using namespace std::literals;
 using namespace bm::util::literals;
@@ -41,112 +42,128 @@ create_logger(const std::string& filename) noexcept
 
 struct command_context;
 
-using command_map =
-    std::unordered_map<std::string_view, std::function<void(std::string_view, command_context)>>;
+using command_map = std::unordered_map<std::string_view, std::function<void(command_context)>>;
+
+using bookmark_container = decltype(bm::build_bookmark_vector(""sv));
 
 struct command_context
 {
-    std::vector<bm::bookmark>& bookmarks;
-    std::span<bm::bookmark>&   current;
-	command_map const& cmap;
+    std::string_view         arguments;
+    bookmark_container&      bookmarks;
+    bookmark_container&      bookmark_buffer;
+    std::span<bm::bookmark>& current;
+    command_map const&       cmap;
 };
-
 
 namespace commands
 {
+
+constexpr auto DEFAULT_SHOW_ARGS = std::pair{0_z, 25_z};
+
 static auto
-show(std::string_view v, command_context ctx)
+show(command_context ctx)
 {
-    auto arguments = bm::split_by_delimiter(v, ' ');
-    auto from      = 0_z;
-    auto amount    = 25_z;
-    switch (size(arguments))
+    namespace views      = ranges::views;
+    auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
+
+    auto const parse_from_and_amount = [&]()
     {
-    case 0:
-        break;
-    case 2:
-    {
-        auto arg = bm::to_number<unsigned int>(arguments[1]);
-        if (!arg)
+        auto const parse_arg_n = [&](auto const n, auto const default_value) -> std::size_t
         {
-            fmt::print("Could not convert \"{}\" to an integer.\n", arguments[1]);
-            return;
-        }
-        amount = *arg;
-    }
-        [[fallthrough]];
-    case 1:
-    {
-        auto arg = bm::to_number<unsigned int>(arguments[0]);
-        if (!arg)
+            auto const arg = bm::to_number<unsigned int>(arguments[n]);
+            if (!arg)
+            {
+                fmt::print(
+                    "Could not convert \"{}\" to an integer defaulting to \"{}\".\n", arguments[n],
+                    default_value
+                );
+                return default_value;
+            }
+            return *arg;
+        };
+
+        switch (size(arguments))
         {
-            fmt::print("Could not convert \"{}\" to an integer.\n", arguments[0]);
-            return;
-        }
-        from = *arg;
-        break;
-    }
-    default:
-    {
-        fmt::print("Too many arguments passed ({}).", size(arguments));
-        return;
-    }
+        case 0:
+            return DEFAULT_SHOW_ARGS;
+        case 1:
+            return std::pair{parse_arg_n(0_z, DEFAULT_SHOW_ARGS.first), DEFAULT_SHOW_ARGS.second};
+        case 2:
+            return std::pair{
+                parse_arg_n(0_z, DEFAULT_SHOW_ARGS.first),
+                parse_arg_n(1_z, DEFAULT_SHOW_ARGS.second)};
+        default:
+            fmt::print(
+                "Too many arguments passed ({}) defaulting to \"{}\", \"{}\".", size(arguments),
+                DEFAULT_SHOW_ARGS.first, DEFAULT_SHOW_ARGS.second
+            );
+            return DEFAULT_SHOW_ARGS;
+        };
     };
 
-    from   = std::min(from, size(ctx.current));
-    amount = std::min(from + amount, size(ctx.current)) - from;
+    auto const [from, amount] = parse_from_and_amount();
 
-    for (auto&& b : ctx.current.subspan(from, amount))
+    for (auto const& b : ctx.current | views::drop(from) | views::take(amount))
     {
         fmt::print("{}\n", b);
     }
 }
+
+// static auto filter(command_context ctx);
+
 } // namespace commands
 
-static inline auto get_input()
+static inline auto
+get_input()
 {
-	auto buffer = std::string{};
-	getline(std::cin, buffer);
-	return buffer;
+    auto buffer = std::string{};
+    getline(std::cin, buffer);
+    return buffer;
 }
 
-static inline auto parse_arguments(std::string_view const line)
+static inline auto
+parse_arguments(std::string_view const line)
 {
-	struct cmd_arg
-	{
-		std::string_view command;
-		std::string_view arguments;
-	};
+    struct cmd_arg
+    {
+        std::string_view command;
+        std::string_view arguments;
+    };
 
-	if (auto space_index = line.find(' '); space_index != line.npos)
-	{
-		return cmd_arg{line.substr(std::min(space_index + 1, size(line))), line.substr(0, space_index)};
-	}
+    if (auto space_index = line.find(' '); space_index != line.npos)
+    {
+        return cmd_arg{
+            line.substr(0, space_index), line.substr(std::min(space_index + 1, size(line)))};
+    }
 
-	return cmd_arg{line, ""sv};
+    return cmd_arg{line, ""sv};
 }
 
 static inline auto
 run_app(std::string_view const bookmark_view)
 {
-    auto bookmarks = bm::build_bookmark_vector(bookmark_view);
-    auto current   = std::span{bookmarks};
+    auto bookmarks       = bm::build_bookmark_vector(bookmark_view);
+    auto bookmark_buffer = bookmark_container{};
+    auto current         = std::span{bookmarks};
 
     auto const cmap = command_map{{"show"sv, commands::show}};
+
+    bookmark_buffer.reserve(bookmarks.capacity());
 
     while (true)
     {
         fmt::print("{}\n", "Enter Command:");
-		auto const buffer = get_input();
-        auto const line = std::string_view{buffer};
 
-        if (line.empty())  // nothing entered
+        auto const buffer = get_input();
+        auto const line   = std::string_view{buffer};
+
+        if (line.empty()) // nothing entered
             continue;
 
-        if (line.starts_with("exit"sv))  // user wants to exit
+        if (line.starts_with("exit"sv)) // user wants to exit
             break;
-		
-		auto const [command, arguments] = parse_arguments(line);
+
+        auto const [command, arguments] = parse_arguments(line);
 
         fmt::print("[{}] [{}]\n", command, arguments);
         if (!cmap.contains(command))
@@ -155,7 +172,7 @@ run_app(std::string_view const bookmark_view)
             continue;
         }
 
-        cmap.at(command)(arguments, {bookmarks, current, cmap});
+        cmap.at(command)({arguments, bookmarks, bookmark_buffer, current, cmap});
     }
 }
 
