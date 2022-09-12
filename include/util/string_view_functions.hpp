@@ -1,11 +1,37 @@
 #pragma once
 
 #include <algorithm>
+#include <cctype>
+#include <charconv>
 #include <concepts>
+#include <optional>
 #include <string_view>
 
 namespace bm::util
 {
+
+template <typename T>
+[[nodiscard]] inline std::optional<T>
+to_number(std::string_view view)
+{
+    if (view.empty())
+        return std::nullopt;
+    if (T value; std::from_chars(view.data(), view.data() + size(view), value).ec == std::errc{})
+        return value;
+    return std::nullopt;
+}
+
+[[nodiscard]] inline auto
+to_upper(char character)
+{
+    return static_cast<char>(std::toupper(static_cast<int>(character)));
+}
+
+[[nodiscard]] inline auto
+to_lower(char character)
+{
+    return static_cast<char>(std::tolower(static_cast<int>(character)));
+}
 
 /*! Get a substring of a given piece of text based on indices.
  *

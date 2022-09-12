@@ -19,17 +19,6 @@ namespace bm
 //! Initial size of the vector returned by split_by_linebreak.
 constexpr std::size_t INITIAL_LINE_VECTOR_SIZE = 8192;
 
-template <typename T>
-[[nodiscard]] inline std::optional<T>
-to_number(std::string_view view)
-{
-    if (view.empty())
-        return std::nullopt;
-    if (T value; std::from_chars(view.data(), view.data() + size(view), value).ec == std::errc{})
-        return value;
-    return std::nullopt;
-}
-
 /*! Read the contents of a file to memory.
  *
  * @param filename path to the file to be read.

@@ -23,7 +23,6 @@ endif()
 
 add_library(
 	${PROJECT_NAME}
-	INTERFACE
 )
 
 set_target_properties(
@@ -34,19 +33,19 @@ set_target_properties(
 
 target_include_directories(
 	${PROJECT_NAME}
-	INTERFACE
+	PUBLIC	
 	"./include"
 )
 
 target_compile_features(
 	${PROJECT_NAME}
-	INTERFACE
+	PUBLIC
 	cxx_std_20
 )
 
 target_link_libraries(
 	${PROJECT_NAME}
-	INTERFACE
+	PUBLIC
 	fmt::fmt
 	spdlog::spdlog
 	range-v3::range-v3

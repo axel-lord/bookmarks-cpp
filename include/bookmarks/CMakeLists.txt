@@ -1,6 +1,6 @@
 target_sources(
 	${PROJECT_NAME}
-	INTERFACE
+	PUBLIC
 	"./line_manipulation.hpp"
 	"./bookmark.hpp"
 	"./structure_constants.hpp"

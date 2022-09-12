@@ -1,4 +1,6 @@
 #include "bookmarks/bookmark.hpp"
+#include "bookmarks/command_context.hpp"
+#include "bookmarks/commands.hpp"
 #include "bookmarks/line_manipulation.hpp"
 #include "bookmarks/structure_constants.hpp"
 #include "util/exit_values.hpp"
@@ -6,6 +8,7 @@
 #include "util/re.hpp"
 
 #include <algorithm>
+#include <cctype>
 #include <fmt/format.h>
 #include <fstream>
 #include <iostream>
@@ -43,143 +46,7 @@ create_logger(const std::string& filename) noexcept
     return std::optional<decltype(internal_creation())>{std::nullopt};
 }
 
-struct command_context;
-
-using command_map = std::unordered_map<std::string_view, std::function<void(command_context)>>;
-
 using bookmark_container = decltype(bm::build_bookmark_vector(""sv));
-
-struct command_context
-{
-    std::string_view         arguments;
-    bookmark_container&      bookmarks;
-    bookmark_container&      bookmark_buffer;
-    std::span<bm::bookmark>& current;
-    command_map const&       cmap;
-};
-
-namespace commands
-{
-
-constexpr auto DEFAULT_SHOW_ARGS = std::pair{0_z, 25_z};
-
-static auto
-show(command_context ctx)
-{
-    namespace views      = ranges::views;
-    auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
-
-    auto const parse_from_and_amount = [&]()
-    {
-        auto const parse_arg_n = [&](auto const n, auto const default_value) -> std::size_t
-        {
-            auto const arg = bm::to_number<unsigned int>(arguments[n]);
-            if (!arg)
-            {
-                fmt::print(
-                    "Could not convert \"{}\" to an integer defaulting to \"{}\".\n", arguments[n],
-                    default_value
-                );
-                return default_value;
-            }
-            return *arg;
-        };
-
-        switch (size(arguments))
-        {
-        case 0:
-            return DEFAULT_SHOW_ARGS;
-        case 1:
-            return std::pair{parse_arg_n(0_z, DEFAULT_SHOW_ARGS.first), DEFAULT_SHOW_ARGS.second};
-        case 2:
-            return std::pair{
-                parse_arg_n(0_z, DEFAULT_SHOW_ARGS.first),
-                parse_arg_n(1_z, DEFAULT_SHOW_ARGS.second)};
-        default:
-            fmt::print(
-                "Too many arguments passed ({}) defaulting to \"{}\", \"{}\".\n", size(arguments),
-                DEFAULT_SHOW_ARGS.first, DEFAULT_SHOW_ARGS.second
-            );
-            return DEFAULT_SHOW_ARGS;
-        };
-    };
-
-    auto const [from, amount] = parse_from_and_amount();
-
-    for (auto const& b : ctx.current | views::drop(from) | views::take(amount))
-    {
-        fmt::print("{}\n", b);
-    }
-}
-
-static auto
-filter(command_context ctx)
-{
-    namespace views = ranges::views;
-
-    if (ctx.arguments.empty())
-    {
-        fmt::print("filter needs arguments, none were passed.\n");
-        return;
-    }
-
-    auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
-    ctx.bookmark_buffer.clear();
-
-    auto const search_re = bm::util::compile_regex(ctx.arguments);
-    if (!search_re)
-    {
-        fmt::print("Could not compile regex \"{}\".\n", ctx.arguments);
-        return;
-    }
-
-    auto const contains_arguments = [&](bm::bookmark b)
-    {
-        // return (b.url.find(ctx.arguments) != b.url.npos) ||
-        //        (b.description.find(ctx.arguments) != b.description.npos);
-        return bool{
-            std::regex_search(begin(b.url), end(b.url), *search_re) ||
-            std::regex_search(begin(b.description), end(b.description), *search_re)};
-    };
-
-    auto const add_to_buffer = [&](bm::bookmark b)
-    {
-        ctx.bookmark_buffer.push_back(b);
-    };
-
-    ranges::for_each(ctx.bookmarks | views::filter(contains_arguments), add_to_buffer);
-    ctx.current = std::span{ctx.bookmark_buffer};
-}
-
-static auto
-count(command_context ctx)
-{
-    fmt::print("{} bookmarks.\n", size(ctx.current));
-}
-
-static auto
-reset(command_context ctx)
-{
-    ctx.current = std::span{ctx.bookmarks};
-}
-
-static auto
-fuzzy(command_context ctx)
-{
-	auto builder = std::ostringstream{};
-	builder << ".*"sv;
-	for (auto&& character : ctx.arguments)
-	{
-		builder << character << ".*"sv;
-	}
-	
-	auto cpy = ctx;
-	cpy.arguments = builder.view();
-
-	filter(cpy);
-}
-
-} // namespace commands
 
 static inline auto
 get_input()
@@ -211,15 +78,13 @@ static inline auto
 run_app(std::string_view const bookmark_view)
 {
     auto bookmarks       = bm::build_bookmark_vector(bookmark_view);
-    auto bookmark_buffer = bookmark_container{};
+    auto bookmark_buffer = std::vector<bm::bookmark>{};
     auto current         = std::span{bookmarks};
 
-    auto const cmap = command_map{
-        {"show"sv, commands::show},
-        {"filter"sv, commands::filter},
-        {"count"sv, commands::count},
-        {"reset"sv, commands::reset},
-		{"fuzzy"sv, commands::fuzzy}};
+    auto const cmap = bm::commands::command_map{
+        {"show"sv, bm::commands::show},   {"filter"sv, bm::commands::filter},
+        {"count"sv, bm::commands::count}, {"reset"sv, bm::commands::reset},
+        {"fuzzy"sv, bm::commands::fuzzy}, {"regex"sv, bm::commands::regex}};
 
     bookmark_buffer.reserve(bookmarks.capacity());
 
