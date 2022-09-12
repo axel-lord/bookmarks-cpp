@@ -21,6 +21,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <utility>
+#include <fmt/color.h>
 
 using namespace std::literals;
 using namespace bm::util::literals;
@@ -90,22 +91,21 @@ run_app(std::string_view const bookmark_view)
 
     while (true)
     {
-        fmt::print("{}\n", "Enter Command:");
+        fmt::print("{}\n", fmt::styled("Enter Command:", fg(fmt::color::light_sea_green)));
 
         auto const buffer = get_input();
-        auto const line   = std::string_view{buffer};
 
-        if (line.empty()) // nothing entered
+        if (buffer.empty()) // nothing entered
             continue;
 
-        auto const [command, arguments] = parse_arguments(line);
+        auto const [command, arguments] = parse_arguments(buffer);
 
         if (command == "exit"sv) // special command to ensure exit is possible
             break;
 
         if (!cmap.contains(command))
         {
-            fmt::print("Could not find command \"{}\".\n", command);
+            fmt::print("{} \"{}\"\n", styled("Could not find command", fg(fmt::color::yellow)), styled(command, fmt::emphasis::bold));
             continue;
         }
 
