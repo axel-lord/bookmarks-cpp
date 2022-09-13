@@ -10,6 +10,12 @@
 namespace bm::util
 {
 
+/*! Convert the contents of a string view to a number.
+ *
+ * @param view string to convert.
+ *
+ * @return a number or nullopt in case of failure.
+ */
 template <typename T>
 [[nodiscard]] inline std::optional<T>
 to_number(std::string_view view)
@@ -21,12 +27,24 @@ to_number(std::string_view view)
     return std::nullopt;
 }
 
+/*! Convert a character to uppercase.
+ *
+ * @param chracter letter to convert.
+ *
+ * @return given letter but uppercase if possible else given letter.
+ */
 [[nodiscard]] inline auto
 to_upper(char character)
 {
     return static_cast<char>(std::toupper(static_cast<int>(character)));
 }
 
+/*! Convert a character to lowercase.
+ *
+ * @param chracter letter to convert.
+ *
+ * @return given letter but lowercase if possible else given letter.
+ */
 [[nodiscard]] inline auto
 to_lower(char character)
 {

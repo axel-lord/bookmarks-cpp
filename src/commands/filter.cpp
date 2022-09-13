@@ -2,9 +2,11 @@
 #include "bookmarks/line_manipulation.hpp"
 #include "util/literal_suffixes.hpp"
 #include "util/re.hpp"
+#include "util/string_view_functions.hpp"
 
 #include <fmt/color.h>
-#include <range/v3/algorithm/for_each.hpp>
+#include <range/v3/algorithm.hpp>
+#include <range/v3/view.hpp>
 #include <sstream>
 
 namespace bm::commands

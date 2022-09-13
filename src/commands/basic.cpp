@@ -4,8 +4,8 @@
 #include "util/string_view_functions.hpp"
 
 #include <fmt/color.h>
-#include <range/v3/algorithm/for_each.hpp>
-#include <range/v3/range/concepts.hpp>
+#include <range/v3/algorithm.hpp>
+#include <range/v3/view.hpp>
 
 namespace bm::commands
 {

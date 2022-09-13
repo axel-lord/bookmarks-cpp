@@ -2,6 +2,7 @@
 
 #include <array>
 #include <catch2/catch_test_macros.hpp>
+#include <spdlog/spdlog.h>
 #include <string_view>
 #include <tuple>
 #include <utility>
@@ -84,7 +85,6 @@ TEST_CASE("to_line, to_bookmark", "[bookmark][text]")
             auto l = bm::to_line(value);
             CHECK(bm::to_bookmark(l) == value);
         }
-            
     }
 }
 
@@ -99,7 +99,7 @@ TEST_CASE("build_bookmark_vector", "[bookmark][text]")
         "<url> https://there    <info>     <tag> "sv,
         "<url> https://hello <info> Hello There! <tag> wow <,> hello   "sv};
 
-    std::array<bm::bookmark, size(bookmarks_text)> bookmarks;
+    [[maybe_unused]] std::array<bm::bookmark, size(bookmarks_text)> bookmarks;
 
     auto data_point_1 = d_p{"", {}};
     auto data_point_2 =

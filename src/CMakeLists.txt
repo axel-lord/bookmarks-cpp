@@ -14,3 +14,4 @@ target_precompile_headers(
 target_link_libraries(demo PRIVATE ${PROJECT_NAME})
 
 add_subdirectory("./commands")
+add_subdirectory("./bookmarks")
