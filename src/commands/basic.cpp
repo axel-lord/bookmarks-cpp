@@ -3,7 +3,9 @@
 #include "util/literal_suffixes.hpp"
 #include "util/string_view_functions.hpp"
 
+#include <fmt/color.h>
 #include <range/v3/algorithm/for_each.hpp>
+#include <range/v3/range/concepts.hpp>
 
 namespace bm::commands
 {
@@ -26,6 +28,7 @@ show(command_context ctx)
             if (!arg)
             {
                 fmt::print(
+                    fg(fmt::color::yellow),
                     "Could not convert \"{}\" to an integer defaulting to \"{}\".\n", arguments[n],
                     default_value
                 );
@@ -46,6 +49,7 @@ show(command_context ctx)
                 parse_arg_n(1_z, DEFAULT_SHOW_ARGS.second)};
         default:
             fmt::print(
+                fg(fmt::color::yellow),
                 "Too many arguments passed ({}) defaulting to \"{}\", \"{}\".\n", size(arguments),
                 DEFAULT_SHOW_ARGS.first, DEFAULT_SHOW_ARGS.second
             );
@@ -55,20 +59,29 @@ show(command_context ctx)
 
     auto const [from, amount] = parse_from_and_amount();
 
-    for (auto const& b : ctx.current | views::drop(from) | views::take(amount))
+    if (from >= size(ctx.current))
+    {
+        fmt::print(fg(fmt::color::yellow), "There are no bookmarks within given range.\n");
+        return;
+    }
+
+    auto const print_bookmark = [&](bm::bookmark b)
     {
         fmt::print("{}\n", b);
-    }
+    };
+
+    ranges::for_each(ctx.current.subspan(from) | views::take(amount), print_bookmark);
 }
 void
 count(command_context ctx)
 {
-    fmt::print("{} bookmarks.\n", size(ctx.current));
+    fmt::print("{} bookmarks.\n", styled(size(ctx.current), fmt::emphasis::bold));
 }
 
 void
 reset(command_context ctx)
 {
     ctx.current = std::span{ctx.bookmarks};
+    fmt::print("All bookmarks shown.\n");
 }
 } // namespace bm::commands

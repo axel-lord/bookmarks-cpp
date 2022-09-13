@@ -3,6 +3,7 @@
 #include "util/literal_suffixes.hpp"
 #include "util/re.hpp"
 
+#include <fmt/color.h>
 #include <range/v3/algorithm/for_each.hpp>
 #include <sstream>
 
@@ -21,7 +22,7 @@ regex(command_context ctx)
         return;
     }
 
-    fmt::print("/{}/\n", ctx.arguments);
+    fmt::print("filtered using regex /{}/\n", styled(ctx.arguments, fmt::emphasis::bold));
 
     auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
     ctx.bookmark_buffer.clear();
@@ -29,7 +30,7 @@ regex(command_context ctx)
     auto const search_re = bm::util::compile_regex(ctx.arguments);
     if (!search_re)
     {
-        fmt::print("Could not compile regex \"{}\".\n", ctx.arguments);
+        fmt::print(fg(fmt::color::yellow), "Could not compile regex \"{}\".\n", ctx.arguments);
         return;
     }
 
