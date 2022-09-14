@@ -1,9 +1,7 @@
 #pragma once
 
 #include <algorithm>
-#include <cctype>
 #include <charconv>
-#include <concepts>
 #include <optional>
 #include <string_view>
 
@@ -17,7 +15,7 @@ namespace bm::util
  * @return a number or nullopt in case of failure.
  */
 template <typename T>
-[[nodiscard]] inline std::optional<T>
+[[nodiscard]] std::optional<T>
 to_number(std::string_view view)
 {
     if (view.empty())
@@ -33,11 +31,8 @@ to_number(std::string_view view)
  *
  * @return given letter but uppercase if possible else given letter.
  */
-[[nodiscard]] inline auto
-to_upper(char character)
-{
-    return static_cast<char>(std::toupper(static_cast<int>(character)));
-}
+[[nodiscard]] char
+to_upper(char character);
 
 /*! Convert a character to lowercase.
  *
@@ -45,11 +40,8 @@ to_upper(char character)
  *
  * @return given letter but lowercase if possible else given letter.
  */
-[[nodiscard]] inline auto
-to_lower(char character)
-{
-    return static_cast<char>(std::tolower(static_cast<int>(character)));
-}
+[[nodiscard]] char
+to_lower(char character);
 
 /*! Get a substring of a given piece of text based on indices.
  *
@@ -59,11 +51,8 @@ to_lower(char character)
  *
  * @return a substring of given text with it's bounds matched to given indices.
  */
-[[nodiscard]] inline auto
-indice_substring(const std::string_view in, std::size_t lower, std::size_t upper)
-{
-    return in.substr(lower, upper - lower);
-}
+[[nodiscard]] std::string_view
+indice_substring(const std::string_view in, std::size_t lower, std::size_t upper);
 
 /*! Trim given characters from the start of a piece of text.
  *
@@ -72,11 +61,8 @@ indice_substring(const std::string_view in, std::size_t lower, std::size_t upper
  *
  * @return a substring of the given text with leading characters in trim_set removed.
  */
-[[nodiscard]] inline auto
-left_trim(const std::string_view in, const std::string_view trim_set)
-{
-    return in.substr(std::min(in.find_first_not_of(trim_set), in.size()));
-}
+[[nodiscard]] std::string_view
+left_trim(const std::string_view in, const std::string_view trim_set);
 
 /*! Trim given characters from the end of a piece of text.
  *
@@ -85,11 +71,8 @@ left_trim(const std::string_view in, const std::string_view trim_set)
  *
  * @return a substring of the given text with trailing characters in trim_set removed.
  */
-[[nodiscard]] inline auto
-right_trim(const std::string_view in, const std::string_view trim_set)
-{
-    return in.substr(0, std::min(in.find_last_not_of(trim_set) + 1, in.size()));
-}
+[[nodiscard]] std::string_view
+right_trim(const std::string_view in, const std::string_view trim_set);
 
 /*! Trim given characters from the start and end of a piece of text.
  *
@@ -98,10 +81,7 @@ right_trim(const std::string_view in, const std::string_view trim_set)
  *
  * @return a substring of the given text with leading and trailing characters in trim_set removed.
  */
-[[nodiscard]] inline auto
-trim(const std::string_view in, const std::string_view trim_set)
-{
-    return left_trim(right_trim(in, trim_set), trim_set);
-}
+[[nodiscard]] std::string_view
+trim(const std::string_view in, const std::string_view trim_set);
 
 } // namespace bm::util
