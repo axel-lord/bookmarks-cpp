@@ -15,3 +15,4 @@ target_link_libraries(demo PRIVATE ${PROJECT_NAME})
 
 add_subdirectory("./commands")
 add_subdirectory("./bookmarks")
+add_subdirectory("./util")
