@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <fmt/color.h>
 #include <fmt/format.h>
 #include <fstream>
 #include <iostream>
@@ -21,7 +22,6 @@
 #include <string_view>
 #include <unordered_map>
 #include <utility>
-#include <fmt/color.h>
 
 using namespace std::literals;
 using namespace bm::util::literals;
@@ -105,7 +105,10 @@ run_app(std::string_view const bookmark_view)
 
         if (!cmap.contains(command))
         {
-            fmt::print("{} \"{}\"\n", styled("Could not find command", fg(fmt::color::yellow)), styled(command, fmt::emphasis::bold));
+            fmt::print(
+                "{} \"{}\"\n", styled("Could not find command", fg(fmt::color::yellow)),
+                styled(command, fmt::emphasis::bold)
+            );
             continue;
         }
 
