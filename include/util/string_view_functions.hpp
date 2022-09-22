@@ -31,8 +31,11 @@ to_number(std::string_view view)
  *
  * @return given letter but uppercase if possible else given letter.
  */
-[[nodiscard]] char
-to_upper(char character);
+[[nodiscard]] inline char
+to_upper(char character)
+{
+    return static_cast<char>(std::toupper(static_cast<int>(character)));
+}
 
 /*! Convert a character to lowercase.
  *
@@ -40,8 +43,11 @@ to_upper(char character);
  *
  * @return given letter but lowercase if possible else given letter.
  */
-[[nodiscard]] char
-to_lower(char character);
+[[nodiscard]] inline char
+to_lower(char character)
+{
+    return static_cast<char>(std::tolower(static_cast<int>(character)));
+}
 
 /*! Get a substring of a given piece of text based on indices.
  *

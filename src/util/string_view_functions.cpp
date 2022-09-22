@@ -6,16 +6,6 @@
 namespace bm::util
 {
 
-[[nodiscard]] char
-to_upper(char character)
-{
-    return static_cast<char>(std::toupper(static_cast<int>(character)));
-}
-[[nodiscard]] char
-to_lower(char character)
-{
-    return static_cast<char>(std::tolower(static_cast<int>(character)));
-}
 
 [[nodiscard]] std::string_view
 indice_substring(const std::string_view in, std::size_t lower, std::size_t upper)

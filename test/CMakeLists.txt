@@ -6,6 +6,7 @@ add_executable(
 	# Sources
 	"./string_view_functions.cpp"
 	"./line_manipulation.cpp"
+	"./case.cpp"
 )
 
 target_link_libraries(
