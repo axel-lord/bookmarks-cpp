@@ -5,6 +5,14 @@
 
 #include "util/string_view_functions.hpp"
 
+static_assert(bm::util::to_upper('a') == 'A');
+static_assert(bm::util::to_upper('j') == 'J');
+static_assert(bm::util::to_upper('z') == 'Z');
+
+static_assert(bm::util::to_lower('A') == 'a');
+static_assert(bm::util::to_lower('J') == 'j');
+static_assert(bm::util::to_lower('Z') == 'z');
+
 TEST_CASE("to_upper/to_lower", "[text]")
 {
 	using d_p = std::pair<char, char>;
