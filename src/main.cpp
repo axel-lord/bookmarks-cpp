@@ -83,9 +83,12 @@ run_app(std::string_view const bookmark_view)
     auto current         = std::span{bookmarks};
 
     auto const cmap = bm::commands::command_map{
-        {"show"sv, bm::commands::show},   {"filter"sv, bm::commands::filter},
-        {"count"sv, bm::commands::count}, {"reset"sv, bm::commands::reset},
-        {"fuzzy"sv, bm::commands::fuzzy}, {"regex"sv, bm::commands::regex}};
+        {"show"sv, bm::commands::show},
+        {"filter"sv, bm::commands::filter},
+        {"count"sv, bm::commands::count},
+        {"reset"sv, bm::commands::reset},
+        {"fuzzy"sv, bm::commands::fuzzy},
+        {"regex"sv, bm::commands::regex}};
 
     bookmark_buffer.reserve(bookmarks.capacity());
 
@@ -106,7 +109,8 @@ run_app(std::string_view const bookmark_view)
         if (!cmap.contains(command))
         {
             fmt::print(
-                "{} \"{}\"\n", styled("Could not find command", fg(fmt::color::yellow)),
+                "{} \"{}\"\n",
+                styled("Could not find command", fg(fmt::color::yellow)),
                 styled(command, fmt::emphasis::bold)
             );
             continue;

@@ -83,7 +83,8 @@ to_bookmark(const std::string_view line)
     };
 
     return bm::bookmark{
-        get_substring(url_tag_end, info_tag_pos), get_substring(info_tag_end, tags_tag_pos),
+        get_substring(url_tag_end, info_tag_pos),
+        get_substring(info_tag_end, tags_tag_pos),
         get_substring(tags_tag_end, size(line))};
 }
 

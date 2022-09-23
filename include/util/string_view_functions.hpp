@@ -34,14 +34,14 @@ to_number(std::string_view view)
 [[nodiscard]] constexpr char
 to_upper(char c)
 {
-    //return static_cast<char>(std::toupper(static_cast<int>(character)));
-	if (c < 'a' || c > 'z')
-		return c;
+    // return static_cast<char>(std::toupper(static_cast<int>(character)));
+    if (c < 'a' || c > 'z')
+        return c;
 
-	if constexpr ('A' > 'a')
-		return c + ('A' - 'a');
-	else
-		return c - ('a' - 'A');
+    if constexpr ('A' > 'a')
+        return c + ('A' - 'a');
+    else
+        return c - ('a' - 'A');
 }
 
 /*! Convert a character to lowercase.
@@ -53,16 +53,15 @@ to_upper(char c)
 [[nodiscard]] constexpr char
 to_lower(char c)
 {
-    //return static_cast<char>(std::tolower(static_cast<int>(character)));
-	if (c < 'A' || c > 'Z')
-		return c;
+    // return static_cast<char>(std::tolower(static_cast<int>(character)));
+    if (c < 'A' || c > 'Z')
+        return c;
 
-	if constexpr ('A' > 'a')
-		return c - ('A' - 'a');
-	else
-		return c + ('a' - 'A');
+    if constexpr ('A' > 'a')
+        return c - ('A' - 'a');
+    else
+        return c + ('a' - 'A');
 }
-
 
 /*! Get a substring of a given piece of text based on indices.
  *
@@ -72,8 +71,9 @@ to_lower(char c)
  *
  * @return a substring of given text with it's bounds matched to given indices.
  */
-[[nodiscard]] std::string_view
-indice_substring(const std::string_view in, std::size_t lower, std::size_t upper);
+[[nodiscard]] std::string_view indice_substring(
+    const std::string_view in, std::size_t lower, std::size_t upper
+);
 
 /*! Trim given characters from the start of a piece of text.
  *
@@ -82,8 +82,9 @@ indice_substring(const std::string_view in, std::size_t lower, std::size_t upper
  *
  * @return a substring of the given text with leading characters in trim_set removed.
  */
-[[nodiscard]] std::string_view
-left_trim(const std::string_view in, const std::string_view trim_set);
+[[nodiscard]] std::string_view left_trim(
+    const std::string_view in, const std::string_view trim_set
+);
 
 /*! Trim given characters from the end of a piece of text.
  *
@@ -92,8 +93,9 @@ left_trim(const std::string_view in, const std::string_view trim_set);
  *
  * @return a substring of the given text with trailing characters in trim_set removed.
  */
-[[nodiscard]] std::string_view
-right_trim(const std::string_view in, const std::string_view trim_set);
+[[nodiscard]] std::string_view right_trim(
+    const std::string_view in, const std::string_view trim_set
+);
 
 /*! Trim given characters from the start and end of a piece of text.
  *
@@ -102,7 +104,6 @@ right_trim(const std::string_view in, const std::string_view trim_set);
  *
  * @return a substring of the given text with leading and trailing characters in trim_set removed.
  */
-[[nodiscard]] std::string_view
-trim(const std::string_view in, const std::string_view trim_set);
+[[nodiscard]] std::string_view trim(const std::string_view in, const std::string_view trim_set);
 
 } // namespace bm::util

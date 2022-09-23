@@ -1,11 +1,10 @@
-#include <string_view>
-#include <optional>
-#include <charconv>
 #include <cctype>
+#include <charconv>
+#include <optional>
+#include <string_view>
 
 namespace bm::util
 {
-
 
 [[nodiscard]] std::string_view
 indice_substring(const std::string_view in, std::size_t lower, std::size_t upper)
@@ -27,4 +26,4 @@ trim(const std::string_view in, const std::string_view trim_set)
 {
     return left_trim(right_trim(in, trim_set), trim_set);
 }
-}
+} // namespace bm::util
