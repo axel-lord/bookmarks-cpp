@@ -13,6 +13,7 @@ find_package(fmt CONFIG REQUIRED)
 find_package(spdlog CONFIG REQUIRED)
 find_package(benchmark CONFIG REQUIRED)
 find_package(range-v3 CONFIG REQUIRED)
+find_package(libXml2 CONFIG REQUIRED)
 
 if(MSVC)
 	add_compile_options(
