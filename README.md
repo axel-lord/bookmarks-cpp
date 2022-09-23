@@ -22,3 +22,6 @@ by vcpkg, or however you want if you feel like it. Build is now finished.
 9. If my instructions where not enough wait for me to write better ones, or 
 build however many other cmake+vcpkg projects are needed to follow them. The first 
 option might take less time.
+
+## Notes
+GPL3 is used due to being the path of least resistance, the program has no need for non-free code but may have need for gpl licensed code.
