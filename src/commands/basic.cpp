@@ -29,7 +29,8 @@ show(command_context ctx)
             {
                 fmt::print(
                     fg(fmt::color::yellow),
-                    "Could not convert \"{}\" to an integer defaulting to \"{}\".\n", arguments[n],
+                    "Could not convert \"{}\" to an integer defaulting to \"{}\".\n",
+                    arguments[n],
                     default_value
                 );
                 return default_value;
@@ -50,8 +51,10 @@ show(command_context ctx)
         default:
             fmt::print(
                 fg(fmt::color::yellow),
-                "Too many arguments passed ({}) defaulting to \"{}\", \"{}\".\n", size(arguments),
-                DEFAULT_SHOW_ARGS.first, DEFAULT_SHOW_ARGS.second
+                "Too many arguments passed ({}) defaulting to \"{}\", \"{}\".\n",
+                size(arguments),
+                DEFAULT_SHOW_ARGS.first,
+                DEFAULT_SHOW_ARGS.second
             );
             return DEFAULT_SHOW_ARGS;
         };
@@ -69,6 +72,12 @@ show(command_context ctx)
     {
         fmt::print("{}\n", b);
     };
+
+    fmt::print(
+        "Showing {} to {}\n",
+        fmt::styled(from, fmt::emphasis::bold),
+        fmt::styled(from + amount, fmt::emphasis::bold)
+    );
 
     ranges::for_each(ctx.current.subspan(from) | views::take(amount), print_bookmark);
 }

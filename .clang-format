@@ -17,6 +17,8 @@ AlignEscapedNewlines: Left
 AlignOperands: AlignAfterOperator
 AlignTrailingComments: true
 AllowShortLambdasOnASingleLine: Empty
+BinPackArguments: false
+BinPackParameters: false
 
 BreakBeforeBraces: Custom
 BraceWrapping:
