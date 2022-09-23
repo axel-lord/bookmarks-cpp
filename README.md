@@ -12,7 +12,7 @@ A c++ utility for keeping track of bookmarks.
 [catch2](https://github.com/catchorg/Catch2), 
 [fmt](https://github.com/fmtlib/fmt), 
 [range-v3](https://github.com/ericniebler/range-v3) and 
-[spdlog with](https://github.com/gabime/spdlog) using your vcpkg instance.
+[spdlog](https://github.com/gabime/spdlog) using your vcpkg instance.
 4. On Windows (msvc) go to step 5 else go to step 8.
 5. Install [Visual Studio 2022](https://visualstudio.microsoft.com/vs/).
 6. Open project folder with visual studio.
