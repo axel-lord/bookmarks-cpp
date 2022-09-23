@@ -15,7 +15,7 @@ static_assert(bm::util::to_lower('Z') == 'z');
 
 TEST_CASE("to_upper/to_lower", "[text]")
 {
-    using d_p = std::pair<char, char>;
+    using d_p = std::pair<int, int>;
 
     // order: lower, upper
     std::array const data = {
@@ -31,13 +31,13 @@ TEST_CASE("to_upper/to_lower", "[text]")
     SECTION("to_upper")
     {
         for (auto const& [lower, upper] : data)
-            CHECK(bm::util::to_upper(lower) == upper);
+            CHECK(bm::util::to_upper(static_cast<char>(lower)) == static_cast<char>(upper));
     }
 
     SECTION("to_lower")
     {
         for (auto const& [lower, upper] : data)
-            CHECK(bm::util::to_lower(upper) == lower);
+            CHECK(bm::util::to_lower(static_cast<char>(upper)) == static_cast<char>(lower));
     }
 
     SECTION("automatic data")
@@ -73,8 +73,8 @@ TEST_CASE("to_upper/to_lower", "[text]")
 
         for (auto const& [lower, upper] : auto_data)
         {
-            CHECK(bm::util::to_upper(lower) == upper);
-            CHECK(bm::util::to_lower(upper) == lower);
+            CHECK(bm::util::to_upper(static_cast<char>(lower)) == static_cast<char>(upper));
+            CHECK(bm::util::to_lower(static_cast<char>(upper)) == static_cast<char>(lower));
         }
     }
 }

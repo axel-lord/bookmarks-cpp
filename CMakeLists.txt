@@ -19,7 +19,6 @@ if(MSVC)
 	add_compile_options(
 		/W4
 		/WX
-		/permissive
 		/w14242
 		/w14254
 		/w14263
