@@ -9,7 +9,6 @@
 #include "util/re.hpp"
 
 #include <algorithm>
-#include <cctype>
 #include <fmt/color.h>
 #include <fmt/format.h>
 #include <fstream>
@@ -59,17 +58,12 @@ get_input()
 }
 
 static inline auto
-run_app(std::string_view const bookmark_view)
+run_app(std::optional<std::string_view> const bookmark_view)
 {
-    auto bookmarks       = bm::build_bookmark_vector(bookmark_view);
+    auto bookmarks       = bm::build_bookmark_vector(bookmark_view.value_or(""sv));
     auto bookmark_buffer = std::vector<bm::bookmark>{};
     auto current         = std::span{bookmarks};
-    auto current_dir     = std::filesystem::absolute("./");
-
-    auto const directory = [](bm::commands::command_context ctx)
-    {
-        fmt::print("{}\n", styled(ctx.current_dir.string(), fmt::emphasis::bold));
-    };
+    auto current_dir     = std::filesystem::current_path();
 
     auto const cmap = bm::commands::command_map{
         {"show"sv, bm::commands::show},
@@ -78,7 +72,7 @@ run_app(std::string_view const bookmark_view)
         {"reset"sv, bm::commands::reset},
         {"fuzzy"sv, bm::commands::fuzzy},
         {"regex"sv, bm::commands::regex},
-        {"fs-dir"sv, directory},
+        {"fs"sv, bm::commands::fs},
     };
 
     bookmark_buffer.reserve(bookmarks.capacity());
@@ -94,12 +88,15 @@ run_app(std::string_view const bookmark_view)
         auto const buffer = get_input();
 
         if (buffer.empty()) // nothing entered
+        {
+            fmt::print(fg(fmt::color::yellow), "Please enter a command.\n");
             continue;
+        }
 
         auto const [command, arguments] = bm::commands::parse_arguments(buffer);
 
         if (command == "exit"sv) // special command to ensure exit is possible
-            break;
+            return;
 
         if (!cmap.contains(command))
         {
@@ -111,8 +108,21 @@ run_app(std::string_view const bookmark_view)
             continue;
         }
 
-        cmap.at(command)({arguments, bookmarks, bookmark_buffer, current, cmap, current_dir});
+        cmap.at(command)(bm::commands::command_context{
+            .arguments       = arguments,
+            .bookmarks       = bookmarks,
+            .bookmark_buffer = bookmark_buffer,
+            .current         = current,
+            .cmap            = cmap,
+            .current_dir     = current_dir,
+        });
     }
+}
+
+static inline auto
+run_app()
+{
+    return run_app(std::nullopt);
 }
 
 int
@@ -126,7 +136,7 @@ main(int const argc, char const* const* const argv)
         return EXIT_VALUE::UNSUPPORTED_EXECUTION;
     }
 
-    if (argc != 2)
+    if (argc > 2)
     {
         fmt::print("Usage: {} [FILE]\n", argv[0]);
         return EXIT_VALUE::USAGE_FAILURE;
@@ -138,14 +148,19 @@ main(int const argc, char const* const* const argv)
     (*opt_logger)->set_level(spdlog::level::trace);
     spdlog::set_default_logger(*opt_logger);
 
-    auto const text = bm::read_file(argv[1]);
-    if (!text)
+    if (argc == 2)
     {
-        fmt::print("Could not open \"{}\"\n", argv[1]);
-        return EXIT_VALUE::FILE_READ_FAILURE;
+        auto const text = bm::read_file(argv[1]);
+        if (!text)
+        {
+            fmt::print("Could not open \"{}\"\n", argv[1]);
+            return EXIT_VALUE::FILE_READ_FAILURE;
+        }
+
+        run_app(text->view());
     }
 
-    run_app(text->view());
+    run_app();
 
     return EXIT_VALUE::SUCCESS;
 }
