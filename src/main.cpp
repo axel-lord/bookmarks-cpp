@@ -1,4 +1,5 @@
 #include "bookmarks/bookmark.hpp"
+#include "bookmarks/command_arguments.hpp"
 #include "bookmarks/command_context.hpp"
 #include "bookmarks/commands.hpp"
 #include "bookmarks/line_manipulation.hpp"
@@ -58,29 +59,17 @@ get_input()
 }
 
 static inline auto
-parse_arguments(std::string_view const line)
-{
-    struct cmd_arg
-    {
-        std::string_view command;
-        std::string_view arguments;
-    };
-
-    if (auto space_index = line.find(' '); space_index != line.npos)
-    {
-        return cmd_arg{
-            line.substr(0, space_index), line.substr(std::min(space_index + 1, size(line)))};
-    }
-
-    return cmd_arg{line, ""sv};
-}
-
-static inline auto
 run_app(std::string_view const bookmark_view)
 {
     auto bookmarks       = bm::build_bookmark_vector(bookmark_view);
     auto bookmark_buffer = std::vector<bm::bookmark>{};
     auto current         = std::span{bookmarks};
+    auto current_dir     = std::filesystem::absolute("./");
+
+    auto const directory = [](bm::commands::command_context ctx)
+    {
+        fmt::print("{}\n", styled(ctx.current_dir.string(), fmt::emphasis::bold));
+    };
 
     auto const cmap = bm::commands::command_map{
         {"show"sv, bm::commands::show},
@@ -88,20 +77,26 @@ run_app(std::string_view const bookmark_view)
         {"count"sv, bm::commands::count},
         {"reset"sv, bm::commands::reset},
         {"fuzzy"sv, bm::commands::fuzzy},
-        {"regex"sv, bm::commands::regex}};
+        {"regex"sv, bm::commands::regex},
+        {"fs-dir"sv, directory},
+    };
 
     bookmark_buffer.reserve(bookmarks.capacity());
 
     while (true)
     {
-        fmt::print("{}\n", fmt::styled("Enter Command:", fg(fmt::color::light_sea_green)));
+        fmt::print(
+            "{0} [{1}]\n> ",
+            fmt::styled("Enter Command", fg(fmt::color::light_sea_green)),
+            current_dir.string()
+        );
 
         auto const buffer = get_input();
 
         if (buffer.empty()) // nothing entered
             continue;
 
-        auto const [command, arguments] = parse_arguments(buffer);
+        auto const [command, arguments] = bm::commands::parse_arguments(buffer);
 
         if (command == "exit"sv) // special command to ensure exit is possible
             break;
@@ -116,7 +111,7 @@ run_app(std::string_view const bookmark_view)
             continue;
         }
 
-        cmap.at(command)({arguments, bookmarks, bookmark_buffer, current, cmap});
+        cmap.at(command)({arguments, bookmarks, bookmark_buffer, current, cmap, current_dir});
     }
 }
 

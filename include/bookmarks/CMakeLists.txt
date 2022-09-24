@@ -4,4 +4,8 @@ target_sources(
 	"./line_manipulation.hpp"
 	"./bookmark.hpp"
 	"./structure_constants.hpp"
+	"./command_context.hpp"
+	"./command_arguments.hpp"
+	"./commands.hpp"
+	"./fs_commands.hpp"
 )

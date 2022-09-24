@@ -10,19 +10,23 @@ namespace bm::util
 
 /*! Convert the contents of a string view to a number.
  *
+ * constexpr should be possible with c++23
+ * 
  * @param view string to convert.
  *
  * @return a number or nullopt in case of failure.
  */
 template <typename T>
-[[nodiscard]] std::optional<T>
+[[nodiscard]] auto
 to_number(std::string_view view)
 {
     if (view.empty())
-        return std::nullopt;
-    if (T value; std::from_chars(view.data(), view.data() + size(view), value).ec == std::errc{})
-        return value;
-    return std::nullopt;
+        return std::optional<T>{std::nullopt};
+
+    if (T value{}; std::from_chars(view.data(), view.data() + size(view), value).ec == std::errc{})
+        return std::optional{value};
+
+    return std::optional<T>{std::nullopt};
 }
 
 /*! Convert a character to uppercase.
@@ -34,7 +38,6 @@ to_number(std::string_view view)
 [[nodiscard]] constexpr char
 to_upper(char c)
 {
-    // return static_cast<char>(std::toupper(static_cast<int>(character)));
     if (c < 'a' || c > 'z')
         return c;
 
@@ -53,7 +56,6 @@ to_upper(char c)
 [[nodiscard]] constexpr char
 to_lower(char c)
 {
-    // return static_cast<char>(std::tolower(static_cast<int>(character)));
     if (c < 'A' || c > 'Z')
         return c;
 
@@ -63,6 +65,8 @@ to_lower(char c)
         return c + ('a' - 'A');
 }
 
+static_assert('A' - 'a' == 'Z' - 'z');
+
 /*! Get a substring of a given piece of text based on indices.
  *
  * @param in text to get substring of.
@@ -71,9 +75,11 @@ to_lower(char c)
  *
  * @return a substring of given text with it's bounds matched to given indices.
  */
-[[nodiscard]] std::string_view indice_substring(
-    const std::string_view in, std::size_t lower, std::size_t upper
-);
+[[nodiscard]] constexpr auto
+indice_substring(const std::string_view in, std::size_t lower, std::size_t upper)
+{
+    return in.substr(lower, upper - lower);
+}
 
 /*! Trim given characters from the start of a piece of text.
  *
@@ -82,9 +88,11 @@ to_lower(char c)
  *
  * @return a substring of the given text with leading characters in trim_set removed.
  */
-[[nodiscard]] std::string_view left_trim(
-    const std::string_view in, const std::string_view trim_set
-);
+[[nodiscard]] constexpr auto
+left_trim(const std::string_view in, const std::string_view trim_set)
+{
+    return in.substr(std::min(in.find_first_not_of(trim_set), in.size()));
+}
 
 /*! Trim given characters from the end of a piece of text.
  *
@@ -93,9 +101,11 @@ to_lower(char c)
  *
  * @return a substring of the given text with trailing characters in trim_set removed.
  */
-[[nodiscard]] std::string_view right_trim(
-    const std::string_view in, const std::string_view trim_set
-);
+[[nodiscard]] constexpr auto
+right_trim(const std::string_view in, const std::string_view trim_set)
+{
+    return in.substr(0, std::min(in.find_last_not_of(trim_set) + 1, in.size()));
+}
 
 /*! Trim given characters from the start and end of a piece of text.
  *
@@ -104,6 +114,10 @@ to_lower(char c)
  *
  * @return a substring of the given text with leading and trailing characters in trim_set removed.
  */
-[[nodiscard]] std::string_view trim(const std::string_view in, const std::string_view trim_set);
+[[nodiscard]] constexpr auto
+trim(const std::string_view in, const std::string_view trim_set)
+{
+    return left_trim(right_trim(in, trim_set), trim_set);
+}
 
 } // namespace bm::util

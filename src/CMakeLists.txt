@@ -3,7 +3,7 @@ add_executable(
 
 	# sources
 	"main.cpp"
-)
+ "commands/fs.cpp")
 
 target_precompile_headers(
 	demo

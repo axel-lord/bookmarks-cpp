@@ -7,6 +7,7 @@ add_executable(
 	"./string_view_functions.cpp"
 	"./line_manipulation.cpp"
 	"./case.cpp"
+	"./command_arguments.cpp"
 )
 
 target_link_libraries(
@@ -25,6 +26,12 @@ target_precompile_headers(
 	${TESTS_NAME}
 	PRIVATE
 	"./PCH.hpp"
+)
+
+target_compile_features(
+	${TESTS_NAME}
+	PRIVATE
+	cxx_std_20
 )
 
 include(CTest)

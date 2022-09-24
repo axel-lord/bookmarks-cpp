@@ -2,6 +2,7 @@
 
 #include "./bookmark.hpp"
 
+#include <filesystem>
 #include <functional>
 #include <span>
 #include <string_view>
@@ -22,5 +23,6 @@ struct command_context
     std::vector<bm::bookmark>& bookmark_buffer;
     std::span<bm::bookmark>&   current;
     command_map const&         cmap;
+    std::filesystem::path&     current_dir;
 };
 } // namespace bm::commands

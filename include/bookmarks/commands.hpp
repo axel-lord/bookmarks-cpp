@@ -10,4 +10,5 @@ void filter(command_context);
 void fuzzy(command_context);
 void count(command_context);
 void reset(command_context);
+void fs(command_context);
 } // namespace bm::commands
