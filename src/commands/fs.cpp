@@ -36,9 +36,9 @@ fs(command_context ctx)
         return;
     }
 
-    auto const mutate_context = [](command_context ctx, auto arguments)
+    auto const mutate_context = [](command_context ctx, auto args)
     {
-        ctx.arguments = arguments;
+        ctx.arguments = args;
         return ctx;
     };
 
