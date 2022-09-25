@@ -18,6 +18,8 @@ using command_map = std::unordered_map<std::string_view, std::function<void(comm
 
 struct command_context
 {
+    bool verbose = true;
+
     std::string_view           arguments;
     std::vector<bm::bookmark>& bookmarks;
     std::vector<bm::bookmark>& bookmark_buffer;

@@ -7,6 +7,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <filesystem>
 
 namespace bm
 {
@@ -17,7 +18,7 @@ namespace bm
  *
  * @return an optional stringstream depending on wether the file could be read from or not.
  */
-[[nodiscard]] std::optional<std::ostringstream> read_file(const char* filename);
+[[nodiscard]] std::optional<std::ostringstream> read_file(std::filesystem::path const&);
 
 /*! Split text into a container.
  *

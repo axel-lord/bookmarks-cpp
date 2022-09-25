@@ -4,6 +4,7 @@
 #include "bookmarks/line_manipulation.hpp"
 
 #include <atomic>
+#include <filesystem>
 #include <fmt/color.h>
 #include <fmt/core.h>
 #include <forward_list>
@@ -166,15 +167,11 @@ load(command_context ctx)
 {
     static auto text_data = std::ostringstream{};
 
-    auto const read_file = [](fs::path const& cwd, fs::path const& input)
-    {
-        auto const path = build_location_path(cwd, input);
-        return bm::read_file(build_location_path(cwd, input).string().c_str());
-    };
+    auto const path = build_location_path(ctx.current_dir, fs::path{ctx.arguments});
 
     // insert file content into text_data_chain
     {
-        auto read_text = read_file(ctx.current_dir, ctx.arguments);
+        auto read_text = bm::read_file(path);
         if (!read_text)
         {
             // print a message
@@ -223,8 +220,16 @@ load(command_context ctx)
     auto const mutate_context = [](command_context ctx)
     {
         ctx.arguments = ""sv;
+        ctx.verbose   = false;
         return ctx;
     };
+
+    if (ctx.verbose)
+        fmt::print(
+            "Added {} bookmarks from \"{}\"\n",
+            styled(size(bookmark_vector), fmt::emphasis::bold),
+            path.string()
+        );
 
     ctx.cmap.at("reset"sv)(mutate_context(ctx));
 }

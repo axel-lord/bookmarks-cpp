@@ -6,6 +6,7 @@
 #include <optional>
 #include <range/v3/view.hpp>
 #include <sstream>
+#include <filesystem>
 #include <vector>
 
 namespace bm
@@ -14,11 +15,11 @@ namespace bm
 constexpr std::size_t INITIAL_LINE_VECTOR_SIZE = 8192;
 
 [[nodiscard]] auto
-read_file(const char* filename) -> std::optional<std::ostringstream>
+read_file(std::filesystem::path const& file_path) -> std::optional<std::ostringstream>
 {
     auto text = std::optional<std::ostringstream>{};
 
-    if (auto file = std::ifstream{filename}) [[likely]]
+    if (auto file = std::ifstream{file_path}) [[likely]]
     {
         text.emplace();
         *text << file.rdbuf();

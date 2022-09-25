@@ -12,7 +12,7 @@ namespace bm::commands
 
 using namespace bm::util::literals;
 
-constexpr auto DEFAULT_SHOW_ARGS = std::pair{0_z, 25_z};
+static constexpr auto DEFAULT_SHOW_ARGS = std::pair{0_z, 25_z};
 
 void
 show(command_context ctx)
@@ -20,6 +20,11 @@ show(command_context ctx)
     namespace views      = ranges::views;
     auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
 
+    if (size(arguments) > 2)
+    {
+        fmt::print(fg(fmt::color::yellow), "Usage: show FROM [COUNT].\n", size(arguments));
+    }
+        
     auto const parse_from_and_amount = [&]()
     {
         auto const parse_arg_n = [&](auto const n, auto const default_value) -> std::size_t
@@ -48,7 +53,7 @@ show(command_context ctx)
             return std::pair{
                 parse_arg_n(0_z, DEFAULT_SHOW_ARGS.first),
                 parse_arg_n(1_z, DEFAULT_SHOW_ARGS.second)};
-        default:
+        default: // should never be reached thanks to earlier check
             fmt::print(
                 fg(fmt::color::yellow),
                 "Too many arguments passed ({}) defaulting to \"{}\", \"{}\".\n",
@@ -73,24 +78,30 @@ show(command_context ctx)
         fmt::print("{}\n", b);
     };
 
-    fmt::print(
-        "Showing {} to {}\n",
-        fmt::styled(from, fmt::emphasis::bold),
-        fmt::styled(from + amount, fmt::emphasis::bold)
-    );
+    if (ctx.verbose)
+        fmt::print(
+            "Showing {} to {}\n",
+            fmt::styled(from, fmt::emphasis::bold),
+            fmt::styled(from + amount, fmt::emphasis::bold)
+        );
 
     ranges::for_each(ctx.current.subspan(from) | views::take(amount), print_bookmark);
 }
 void
 count(command_context ctx)
 {
-    fmt::print("{} bookmarks.\n", styled(size(ctx.current), fmt::emphasis::bold));
+    if (ctx.verbose)
+        fmt::print("{} bookmarks.\n", styled(size(ctx.current), fmt::emphasis::bold));
+    else
+        fmt::print("{}\n", size(ctx.current));
 }
 
 void
 reset(command_context ctx)
 {
     ctx.current = std::span{ctx.bookmarks};
-    fmt::print("All bookmarks shown.\n");
+
+    if (ctx.verbose)
+        fmt::print("All bookmarks selected.\n");
 }
 } // namespace bm::commands

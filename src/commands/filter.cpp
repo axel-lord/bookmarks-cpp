@@ -20,11 +20,12 @@ regex(command_context ctx)
 
     if (ctx.arguments.empty())
     {
-        fmt::print("filter needs arguments, none were passed.\n");
+        fmt::print(fg(fmt::color::yellow), "Usage: regex PATTERN\n");
         return;
     }
 
-    fmt::print("filtered using regex /{}/\n", styled(ctx.arguments, fmt::emphasis::bold));
+    if (ctx.verbose)
+        fmt::print("Bookmarks filtered using regex /{}/\n", styled(ctx.arguments, fmt::emphasis::bold));
 
     auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
     ctx.bookmark_buffer.clear();
@@ -32,7 +33,7 @@ regex(command_context ctx)
     auto const search_re = bm::util::compile_regex(ctx.arguments);
     if (!search_re)
     {
-        fmt::print(fg(fmt::color::yellow), "Could not compile regex \"{}\".\n", ctx.arguments);
+        fmt::print(fg(fmt::color::yellow), "Could not compile regex /{}/.\n", ctx.arguments);
         return;
     }
 
@@ -43,12 +44,13 @@ regex(command_context ctx)
             std::regex_search(begin(b.description), end(b.description), *search_re)};
     };
 
-    auto const add_to_buffer = [&](bm::bookmark b)
+    auto const add_matching_to_buffer = [&](bm::bookmark b)
     {
-        ctx.bookmark_buffer.push_back(b);
+        if (contains_arguments(b))
+            ctx.bookmark_buffer.push_back(b);
     };
 
-    ranges::for_each(ctx.bookmarks | views::filter(contains_arguments), add_to_buffer);
+    ranges::for_each(ctx.bookmarks, add_matching_to_buffer);
     ctx.current = std::span{ctx.bookmark_buffer};
 }
 
@@ -57,6 +59,11 @@ fuzzy(command_context ctx)
 {
     using namespace std::literals::string_view_literals;
     using namespace bm::util::literals;
+
+    if (ctx.arguments.empty())
+    {
+        fmt::print(fg(fmt::color::yellow), "Usage: fuzzy STRING\n");
+    }
 
     auto builder = std::ostringstream{};
 
@@ -81,6 +88,11 @@ void
 filter(command_context ctx)
 {
     auto builder = std::ostringstream{};
+
+    if (ctx.arguments.empty())
+    {
+        fmt::print(fg(fmt::color::yellow), "Usage: filter STRING\n");
+    }
 
     auto const process_character = [&](char character)
     {
