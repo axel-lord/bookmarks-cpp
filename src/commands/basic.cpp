@@ -73,9 +73,9 @@ show(command_context ctx)
         return;
     }
 
-    auto const print_bookmark = [&](bm::bookmark b)
+    auto const print_bookmark = [&](bm::bookmark const b)
     {
-        fmt::print("{}\n", b);
+        fmt::print("[{}] {}\n", b.url, b.description);
     };
 
     if (ctx.verbose)
