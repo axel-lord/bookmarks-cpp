@@ -1,17 +1,28 @@
-add_executable(
-	demo
+set(DEMO_NAME demo)
 
-	# sources
+add_executable(
+	${DEMO_NAME}
 	"main.cpp"
- "commands/fs.cpp")
+)
 
 target_precompile_headers(
-	demo
+	${DEMO_NAME}
 	PRIVATE
 	"./PCH.hpp"
 )
 
-target_link_libraries(demo PRIVATE ${PROJECT_NAME})
+target_compile_features(
+	${DEMO_NAME}
+	PRIVATE
+	cxx_std_20
+)
+
+
+target_link_libraries(
+	${DEMO_NAME}
+	PRIVATE
+	${PROJECT_NAME}
+)
 
 add_subdirectory("./commands")
 add_subdirectory("./bookmarks")

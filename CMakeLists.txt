@@ -1,7 +1,16 @@
 cmake_minimum_required(VERSION 3.19.0)
 project(bookmark_browser VERSION 0.1.0)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+if (CMAKE_BUILD_TYPE MATCHES "Release|RelWithDebInfo|MinSizeRel")
+	message(STATUS "Release build detected")
+	set(CMAKE_INTERPROCEDURAL_OPTIMIZATION TRUE)
+	
+elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
+	message(STATUS "Debug build detected")
+	set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+
+endif()
+
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 set(CMAKE_CXX_STANDARD 20)
@@ -38,10 +47,11 @@ if(MSVC)
 		/w14906
 		/w14928
 	)
-	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+	if (CMAKE_BUILD_TYPE STREQUAL "Debug")	
 		add_compile_options(
 			/WX
 		)
+		message(STATUS "MSVC Error on warning set")
 	endif()
 endif()
 
@@ -66,6 +76,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 		add_compile_options(
 			-Werror
 		)
+		message(STATUS "GNU/Clang Error on warning set")
 	endif()
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		add_compile_options(
@@ -77,6 +88,12 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 			-Wuseless-cast
 		)
 	else ()
+		if (CLANG_TIME_BUILD)
+			add_compile_options(
+				-ftime-trace
+			)
+			message(STATUS "Will generate a build trace.")
+		endif()
 		add_compile_options(
 			-Wno-c++98-compat
 			-Wno-c++20-compat
@@ -118,6 +135,12 @@ target_link_libraries(
 	fmt::fmt
 	spdlog::spdlog
 	range-v3::range-v3
+)
+
+target_precompile_headers(
+	${PROJECT_NAME}
+	PRIVATE
+	"./PCH_shared.hpp"
 )
 
 add_subdirectory("./src")

@@ -1,32 +1,25 @@
-#include "bookmarks/bookmark.hpp"
 #include "bookmarks/command_arguments.hpp"
 #include "bookmarks/command_context.hpp"
 #include "bookmarks/commands.hpp"
-#include "bookmarks/line_manipulation.hpp"
-#include "bookmarks/structure_constants.hpp"
 #include "util/exit_values.hpp"
 #include "util/literal_suffixes.hpp"
-#include "util/re.hpp"
 
-#include <algorithm>
 #include <fmt/color.h>
-#include <fmt/format.h>
-#include <fstream>
-#include <iostream>
 #include <optional>
-#include <range/v3/algorithm/for_each.hpp>
-#include <regex>
 #include <span>
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/spdlog.h>
-#include <string_view>
-#include <unordered_map>
-#include <utility>
 
 using namespace std::literals;
 using namespace bm::util::literals;
 
 namespace EXIT_VALUE = bm::util::EXIT_VALUE;
+
+namespace bm
+{
+[[nodiscard]] std::vector<bookmark> build_bookmark_vector(std::string_view const bookmark_view);
+[[nodiscard]] std::optional<std::ostringstream> read_file(std::filesystem::path const& filepath);
+} // namespace bm
 
 [[nodiscard]] static inline auto
 create_logger(const std::string& filename) noexcept
