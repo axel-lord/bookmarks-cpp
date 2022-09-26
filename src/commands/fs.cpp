@@ -37,10 +37,10 @@ fs(command_context ctx)
         return;
     }
 
-    auto const mutate_context = [](command_context ctx, auto args)
+    auto const mutate_context = [](command_context context, auto args)
     {
-        ctx.arguments = args;
-        return ctx;
+        context.arguments = args;
+        return context;
     };
 
     fs_cmd_map.at(command)(mutate_context(ctx, arguments));
@@ -154,7 +154,7 @@ change(command_context ctx)
     {
         fmt::print(fg(fmt::color::yellow), "\"{}\" is not a valid path change.", ctx.arguments);
         return;
-    };
+    }
 
     // c++23 use and_then
     ctx.current_dir = std::move(*new_path);
@@ -217,11 +217,11 @@ load(command_context ctx)
 
     ranges::for_each(bookmark_vector, push_to_bookmarks);
 
-    auto const mutate_context = [](command_context ctx)
+    auto const mutate_context = [](command_context context)
     {
-        ctx.arguments = ""sv;
-        ctx.verbose   = false;
-        return ctx;
+        context.arguments = ""sv;
+        context.verbose   = false;
+        return context;
     };
 
     if (ctx.verbose)

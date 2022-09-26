@@ -62,7 +62,7 @@ show(command_context ctx)
                 DEFAULT_SHOW_ARGS.second
             );
             return DEFAULT_SHOW_ARGS;
-        };
+        }
     };
 
     auto const [from, amount] = parse_from_and_amount();

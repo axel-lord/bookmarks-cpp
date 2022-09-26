@@ -18,7 +18,6 @@ find_package(libXml2 CONFIG REQUIRED)
 if(MSVC)
 	add_compile_options(
 		/W4
-		/WX
 		/w14242
 		/w14254
 		/w14263
@@ -39,12 +38,17 @@ if(MSVC)
 		/w14906
 		/w14928
 	)
-else()
+	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+		add_compile_options(
+			/WX
+		)
+	endif()
+endif()
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
 	add_compile_options(
-		-Werror
 		-Wall
 		-Wextra
-		-pedantic
 		-Wpedantic
 		-Wshadow
 		-Wnon-virtual-dtor
@@ -58,6 +62,11 @@ else()
 		-Wformat=2
 		-Wimplicit-fallthrough
 	)
+	if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+		add_compile_options(
+			-Werror
+		)
+	endif()
 	if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 		add_compile_options(
 			-Wmisleading-indentation
@@ -67,11 +76,19 @@ else()
 			-Wnull-dereference
 			-Wuseless-cast
 		)
-	elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+	else ()
 		add_compile_options(
+			-Wno-c++98-compat
+			-Wno-c++20-compat
+			-Wno-global-constructors
+			-Wno-c++98-compat-pedantic
+			-Wno-newline-eof
+			-Wno-missing-prototypes
+			-Wno-exit-time-destructors
 		)
 	endif()
 endif()
+
 
 add_library(
 	${PROJECT_NAME}

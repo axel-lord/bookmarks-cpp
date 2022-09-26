@@ -2,11 +2,12 @@
 #include "bookmarks/structure_constants.hpp"
 #include "util/string_view_functions.hpp"
 
+#include <filesystem>
 #include <fstream>
 #include <optional>
+#include <range/v3/algorithm/for_each.hpp>
 #include <range/v3/view.hpp>
 #include <sstream>
-#include <filesystem>
 #include <vector>
 
 namespace bm
@@ -111,26 +112,23 @@ build_bookmark_vector(std::string_view const bookmark_view)
         return line != bm::constants::BOOKMARKS_END;
     };
 
-    auto const has_value = [](auto const optional_bookmark)
-    {
-        return !!optional_bookmark;
-    };
-
-    auto const dereference = [](auto const pointer_like)
-    {
-        return *pointer_like;
-    };
-
     auto bookmarks = lines | views::drop_while(is_not_bookmark_begin) | views::drop(1) |
-                     views::take_while(is_not_bookmark_end) | views::transform(bm::to_bookmark) |
-                     views::filter(has_value) | views::transform(dereference);
+                     views::take_while(is_not_bookmark_end);
 
     // allows for reserving capacity.
     auto bookmark_vector = std::vector<bm::bookmark>{};
     bookmark_vector.reserve(lines.capacity());
 
-    for (auto const& b : bookmarks)
-        bookmark_vector.push_back(b);
+    auto const create_and_push_bookmark = [&](std::string_view l)
+    {
+        auto const b = bm::to_bookmark(l);
+        if (b.has_value())
+        {
+            bookmark_vector.emplace_back(*b);
+        }
+    };
+
+    ranges::for_each(bookmarks, create_and_push_bookmark);
 
     return bookmark_vector;
 }

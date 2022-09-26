@@ -14,11 +14,11 @@ namespace bm
 
 /*! Read the contents of a file to memory.
  *
- * @param filename path to the file to be read.
+ * @param filepath path to the file to be read.
  *
  * @return an optional stringstream depending on wether the file could be read from or not.
  */
-[[nodiscard]] std::optional<std::ostringstream> read_file(std::filesystem::path const&);
+[[nodiscard]] std::optional<std::ostringstream> read_file(std::filesystem::path const& filepath);
 
 /*! Split text into a container.
  *
@@ -65,7 +65,6 @@ namespace bm
 
 /*! Build a bookmark container from a text containing bookmarks.
  *
- * @param logger logger to use.
  * @param bookmark_view text containing bookmarks.
  *
  * @return a container of bookmarks created from given text.

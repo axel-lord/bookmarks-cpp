@@ -31,7 +31,7 @@ to_number(std::string_view view)
 
 /*! Convert a character to uppercase.
  *
- * @param chracter letter to convert.
+ * @param c letter to convert.
  *
  * @return given letter but uppercase if possible else given letter.
  */
@@ -49,7 +49,7 @@ to_upper(char c)
 
 /*! Convert a character to lowercase.
  *
- * @param chracter letter to convert.
+ * @param c letter to convert.
  *
  * @return given letter but lowercase if possible else given letter.
  */
