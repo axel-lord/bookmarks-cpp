@@ -8,4 +8,5 @@ target_sources(
 	"./command_arguments.hpp"
 	"./commands.hpp"
 	"./fs_commands.hpp"
+	"./data_registry.hpp"
 )

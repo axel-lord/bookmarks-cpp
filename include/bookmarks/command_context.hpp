@@ -9,6 +9,11 @@
 #include <unordered_map>
 #include <vector>
 
+namespace bm::data
+{
+class registry;
+}
+
 namespace bm::commands
 {
 
@@ -26,5 +31,6 @@ struct command_context
     std::span<bm::bookmark>&   current;
     command_map const&         cmap;
     std::filesystem::path&     current_dir;
+    data::registry&            registry;
 };
 } // namespace bm::commands

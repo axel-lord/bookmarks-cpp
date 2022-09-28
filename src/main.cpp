@@ -1,10 +1,12 @@
 #include "bookmarks/command_arguments.hpp"
 #include "bookmarks/command_context.hpp"
 #include "bookmarks/commands.hpp"
+#include "bookmarks/data_registry.hpp"
 #include "util/exit_values.hpp"
 #include "util/literal_suffixes.hpp"
 
 #include <fmt/color.h>
+#include <iostream>
 #include <optional>
 #include <span>
 #include <spdlog/sinks/basic_file_sink.h>
@@ -57,6 +59,7 @@ run_app(std::optional<std::string_view> const bookmark_view)
     auto bookmark_buffer = std::vector<bm::bookmark>{};
     auto current         = std::span{bookmarks};
     auto current_dir     = std::filesystem::current_path();
+    auto registry        = bm::data::registry{};
 
     auto const cmap = bm::commands::command_map{
         {"show"sv, bm::commands::show},
@@ -65,7 +68,7 @@ run_app(std::optional<std::string_view> const bookmark_view)
         {"reset"sv, bm::commands::reset},
         {"fuzzy"sv, bm::commands::fuzzy},
         {"regex"sv, bm::commands::regex},
-        {"fs"sv, bm::commands::fs},
+        {"fs"sv, bm::commands::make_fs_command()},
     };
 
     bookmark_buffer.reserve(bookmarks.capacity());
@@ -108,6 +111,7 @@ run_app(std::optional<std::string_view> const bookmark_view)
             .current         = current,
             .cmap            = cmap,
             .current_dir     = current_dir,
+            .registry        = registry,
         });
     }
 }

@@ -2,6 +2,7 @@
 #include "bookmarks/command_context.hpp"
 #include "bookmarks/fs_commands.hpp"
 #include "bookmarks/line_manipulation.hpp"
+#include "bookmarks/data_registry.hpp"
 
 #include <atomic>
 #include <filesystem>
@@ -12,63 +13,63 @@
 #include <string_view>
 #include <system_error>
 
-namespace bm::commands
-{
-using namespace std::literals::string_view_literals;
-
-static auto const fs_cmd_map = bm::commands::command_map{
-    {"list"sv, file::list},
-    {"change"sv, file::change},
-    {"load"sv, file::load},
-};
-
-void
-fs(command_context ctx)
-{
-    auto const [command, arguments] = parse_arguments(ctx.arguments);
-
-    if (!fs_cmd_map.contains(command))
-    {
-        fmt::print(
-            "{} \"{}\"\n",
-            styled("Could not find command", fg(fmt::color::yellow)),
-            styled(fmt::format("fs {}", command), fmt::emphasis::bold)
-        );
-        return;
-    }
-
-    auto const mutate_context = [](command_context context, auto args)
-    {
-        context.arguments = args;
-        return context;
-    };
-
-    fs_cmd_map.at(command)(mutate_context(ctx, arguments));
-}
-} // namespace bm::commands
-
 namespace fs = std::filesystem;
-
-static auto
-ensure_directory(fs::path const& p)
-{
-    if (is_directory(p))
-        return std::optional<fs::path>{p};
-    else
-        return std::optional<fs::path>{std::nullopt};
-}
-
-static auto
-build_location_path(fs::path const& cwd, fs::path const& input)
-{
-    if (input.is_absolute())
-        return input;
-    else
-        return absolute(cwd / input);
-}
 
 namespace bm::commands::file
 {
+namespace
+{
+    using namespace std::literals::string_view_literals;
+
+    struct filesystem_command
+    {
+        command_map cmap = {
+            {"list"sv, file::list},
+            {"change"sv, file::change},
+            {"load"sv, file::load},
+        };
+
+        void operator()(command_context ctx) const
+        {
+            auto const [command, arguments] = parse_arguments(ctx.arguments);
+
+            if (!cmap.contains(command))
+            {
+                fmt::print(
+                    "{} \"{}\"\n",
+                    styled("Could not find command", fg(fmt::color::yellow)),
+                    styled(fmt::format("fs {}", command), fmt::emphasis::bold)
+                );
+                return;
+            }
+
+            auto const mutate_context = [](command_context context, auto args)
+            {
+                context.arguments = args;
+                return context;
+            };
+
+            cmap.at(command)(mutate_context(ctx, arguments));
+        }
+    };
+
+    auto ensure_directory(fs::path const& p)
+    {
+        if (is_directory(p))
+            return std::optional<fs::path>{p};
+        else
+            return std::optional<fs::path>{std::nullopt};
+    }
+
+    auto build_location_path(fs::path const& cwd, fs::path const& input)
+    {
+        if (input.is_absolute())
+            return input;
+        else
+            return absolute(cwd / input);
+    }
+} // namespace
+
 void
 list(command_context ctx)
 {
@@ -160,7 +161,7 @@ change(command_context ctx)
     ctx.current_dir = std::move(*new_path);
 }
 
-static auto text_data_chain = std::forward_list<std::ostringstream>{};
+// static auto text_data_chain = std::forward_list<std::ostringstream>{};
 
 void
 load(command_context ctx)
@@ -170,6 +171,7 @@ load(command_context ctx)
     auto const path = build_location_path(ctx.current_dir, fs::path{ctx.arguments});
 
     // insert file content into text_data_chain
+    auto const store_file_content = [&]() -> std::optional<std::string_view>
     {
         auto read_text = bm::read_file(path);
         if (!read_text)
@@ -180,14 +182,16 @@ load(command_context ctx)
                 styled("Could not read from"sv, fg(fmt::color::yellow)),
                 styled(ctx.arguments, fmt::emphasis::bold)
             );
-            return;
+            return std::nullopt;
         }
-        text_data_chain.emplace_front(std::move(*read_text));
-    }
+        auto text_storage = std::make_shared<std::ostringstream>(std::move(*read_text));
+        ctx.registry.register_owner(text_storage);
+        return text_storage->view();
+    };
 
-    auto const& text = text_data_chain.front();
+    auto const text = store_file_content();
 
-    auto const bookmark_vector = bm::build_bookmark_vector(text.view());
+    auto const bookmark_vector = bm::build_bookmark_vector(*text);
 
     if (bookmark_vector.empty())
     {
@@ -200,7 +204,7 @@ load(command_context ctx)
 
         // data that did not create any bookmarks can be freed
         // text becomes a dangling reference (does not matter to much thanks to return on next line)
-        text_data_chain.pop_front();
+        ctx.registry.unregister_back();
         return;
     }
 
@@ -235,3 +239,12 @@ load(command_context ctx)
 }
 
 } // namespace bm::commands::file
+
+namespace bm::commands
+{
+std::function<void(command_context)>
+make_fs_command()
+{
+    return file::filesystem_command{};
+}
+} // namespace bm::commands
