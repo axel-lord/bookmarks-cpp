@@ -9,6 +9,17 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
 	message(STATUS "Debug build detected")
 	set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
+else()
+	message(STATUS "Could not detect build type")
+
+endif()
+
+if (NOT USE_PCH)
+	set(USE_PCH FALSE)
+endif()
+
+if (${USE_PCH})
+	message(STATUS "Using precompiled headers")
 endif()
 
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
@@ -137,11 +148,13 @@ target_link_libraries(
 	range-v3::range-v3
 )
 
-target_precompile_headers(
-	${PROJECT_NAME}
-	PRIVATE
-	"./PCH_shared.hpp"
-)
+if (${USE_PCH})
+	target_precompile_headers(
+		${PROJECT_NAME}
+		PRIVATE
+		"./PCH_shared.hpp"
+	)
+endif()
 
 add_subdirectory("./src")
 add_subdirectory("./include")

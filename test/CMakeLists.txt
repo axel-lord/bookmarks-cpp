@@ -22,11 +22,13 @@ target_link_libraries(
 	${PROJECT_NAME}
 )
 
-target_precompile_headers(
-	${TESTS_NAME}
-	PRIVATE
-	"./PCH.hpp"
-)
+if (${USE_PCH})
+	target_precompile_headers(
+		${TESTS_NAME}
+		PRIVATE
+		"./PCH.hpp"
+	)
+endif()
 
 target_compile_features(
 	${TESTS_NAME}

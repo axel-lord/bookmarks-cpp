@@ -5,11 +5,13 @@ add_executable(
 	"main.cpp"
 )
 
-target_precompile_headers(
-	${DEMO_NAME}
-	PRIVATE
-	"./PCH.hpp"
-)
+if (${USE_PCH})
+	target_precompile_headers(
+		${DEMO_NAME}
+		PRIVATE
+		"./PCH.hpp"
+	)
+endif()
 
 target_compile_features(
 	${DEMO_NAME}

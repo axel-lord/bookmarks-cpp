@@ -3,6 +3,7 @@
 #include "bookmarks/fs_commands.hpp"
 
 #include <filesystem>
+#include <fmt/color.h>
 
 using namespace std::literals::string_view_literals;
 

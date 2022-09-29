@@ -1,6 +1,8 @@
 #include "./fs_misc.hpp"
 #include "bookmarks/command_context.hpp"
 
+#include <fmt/color.h>
+
 namespace bm::commands::file
 {
 void

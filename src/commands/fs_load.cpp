@@ -3,6 +3,9 @@
 #include "bookmarks/data_registry.hpp"
 #include "bookmarks/line_manipulation.hpp"
 
+#include <fmt/color.h>
+#include <range/v3/algorithm/for_each.hpp>
+
 using namespace std::literals::string_view_literals;
 namespace fs = std::filesystem;
 

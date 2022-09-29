@@ -2,6 +2,8 @@
 #include "bookmarks/command_context.hpp"
 
 #include <filesystem>
+#include <fmt/color.h>
+#include <range/v3/algorithm/for_each.hpp>
 
 using namespace std::literals::string_view_literals;
 namespace fs = std::filesystem;

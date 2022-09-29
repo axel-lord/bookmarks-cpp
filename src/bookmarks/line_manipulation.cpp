@@ -3,6 +3,7 @@
 #include "util/string_view_functions.hpp"
 
 #include <filesystem>
+#include <fmt/format.h>
 #include <fstream>
 #include <optional>
 #include <range/v3/algorithm/for_each.hpp>
