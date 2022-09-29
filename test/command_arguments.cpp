@@ -1,9 +1,9 @@
 #include "bookmarks/command_arguments.hpp"
 
+#include <array>
 #include <catch2/catch_test_macros.hpp>
 #include <string_view>
 #include <utility>
-#include <array>
 
 TEST_CASE("parse_arguments", "[commands]")
 {
@@ -26,5 +26,4 @@ TEST_CASE("parse_arguments", "[commands]")
         CHECK(r_cmd == o_cmd);
         CHECK(r_args == o_args);
     }
-        
 }

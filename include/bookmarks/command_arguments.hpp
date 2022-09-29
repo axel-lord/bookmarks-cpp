@@ -23,8 +23,7 @@ parse_arguments(std::string_view const input_line)
     {
         return std::pair{
             whitespace_trim(line.substr(0, space_index)),
-            whitespace_trim(line.substr(std::min(space_index + 1, size(line))))
-        };
+            whitespace_trim(line.substr(std::min(space_index + 1, size(line))))};
     }
 
     return std::pair{line, ""sv};

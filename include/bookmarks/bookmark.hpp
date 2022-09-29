@@ -16,4 +16,3 @@ struct bookmark
 };
 
 } // namespace bm
-

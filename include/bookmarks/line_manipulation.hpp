@@ -2,12 +2,12 @@
 
 #include "bookmarks/bookmark.hpp"
 
+#include <filesystem>
 #include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <filesystem>
 
 namespace bm
 {

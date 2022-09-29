@@ -25,7 +25,9 @@ regex(command_context ctx)
     }
 
     if (ctx.verbose)
-        fmt::print("Bookmarks filtered using regex /{}/\n", styled(ctx.arguments, fmt::emphasis::bold));
+        fmt::print(
+            "Bookmarks filtered using regex /{}/\n", styled(ctx.arguments, fmt::emphasis::bold)
+        );
 
     auto const arguments = bm::split_by_delimiter(ctx.arguments, ' ');
     ctx.bookmark_buffer.clear();

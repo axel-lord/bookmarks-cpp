@@ -11,7 +11,7 @@ namespace bm::util
 /*! Convert the contents of a string view to a number.
  *
  * constexpr should be possible with c++23
- * 
+ *
  * @param view string to convert.
  *
  * @return a number or nullopt in case of failure.

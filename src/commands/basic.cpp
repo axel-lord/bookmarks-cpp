@@ -24,7 +24,7 @@ show(command_context ctx)
     {
         fmt::print(fg(fmt::color::yellow), "Usage: show FROM [COUNT].\n", size(arguments));
     }
-        
+
     auto const parse_from_and_amount = [&]()
     {
         auto const parse_arg_n = [&](auto const n, auto const default_value) -> std::size_t
