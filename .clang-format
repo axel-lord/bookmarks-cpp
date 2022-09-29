@@ -3,7 +3,7 @@ AccessModifierOffset: -4
 BasedOnStyle: 'Microsoft'
 ColumnLimit: 100
 IndentWidth: '4'
-NamespaceIndentation: Inner
+NamespaceIndentation: None
 TabWidth: '4'
 UseTab: Never
 AlignAfterOpenBracket : BlockIndent
