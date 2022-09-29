@@ -2,7 +2,8 @@ set(DEMO_NAME demo)
 
 add_executable(
 	${DEMO_NAME}
-	"main.cpp"
+	"./main.cpp"
+	"./run_app.cpp"
 )
 
 if (${USE_PCH})
