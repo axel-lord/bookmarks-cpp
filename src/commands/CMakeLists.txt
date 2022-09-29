@@ -4,4 +4,8 @@ target_sources(
 	"./basic.cpp"
 	"./filter.cpp"
 	"./fs.cpp"
+	"./fs_misc.hpp"
+	"./fs_load.cpp"
+	"./fs_list.cpp"
+	"./fs_change.cpp"
 )
